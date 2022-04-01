@@ -47,7 +47,7 @@ fun <D: BoardGui, B: Board>makeGame(
     decorator: (B) -> D,
     Board: () -> B,
     playerClasses: List<(Int, D, List<Int>) -> Player<D>>,//List<KFunction3<Int, BoardGui, List<Int>, Player<out Board>>>,
-    block: Game<D>.()->Unit = { }
+    block: suspend Game<D>.()->Unit = { }
 ): Game<D> {
     makeBoard(Board, playerClasses.size).apply {
         val boardGui = decorator(this)

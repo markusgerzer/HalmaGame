@@ -3,7 +3,7 @@ package halma
 class Game<T: Board>(
     val board: Board,
     val players: List<Player<T>>,
-    val block: Game<T>.()->Unit = { }
+    val block: suspend Game<T>.()->Unit = { }
 ) {
     var round = 1
 

@@ -24,7 +24,6 @@ class Pan(color: RGBA): Graphics() {
         val HALF_MOVE_TIME = 500.milliseconds
     }
     var fieldIdx = -1
-        private set
 
     var onClickCallback: (suspend (Pan) -> Unit)? = null
     init {
@@ -46,11 +45,6 @@ class Pan(color: RGBA): Graphics() {
         }
     }
 
-    fun xy(fieldIdx: Int): Pan {
-        this.fieldIdx = fieldIdx
-        return xy(StarhalmaBoardGui.fieldCoordinates[fieldIdx])
-    }
-
     suspend fun tip() {
         tween(::rotation[(-16).degrees], time = HALF_MOVE_TIME)
     }
@@ -59,37 +53,37 @@ class Pan(color: RGBA): Graphics() {
         tween(::rotation[0.degrees], time = HALF_MOVE_TIME)
     }
 
-    suspend fun moveTo(fieldIdxList: List<Int>) {
+    suspend fun moveTo(points: List<Point>) {
         parent?.let {
             removeFromParent()
             addTo(it)
         }
         tip()
-        for (fieldIdx in fieldIdxList) {
+        for (p in points) {
             tween(
-                ::x[x, (x + StarhalmaBoardGui.fieldCoordinates[fieldIdx].x) / 2],
-                ::y[y, (y + StarhalmaBoardGui.fieldCoordinates[fieldIdx].y) / 2 - 100],
+                ::x[x, (x + p.x) / 2],
+                ::y[y, (y + p.y) / 2 - 100],
                 time = HALF_MOVE_TIME
             )
             tween(
-                ::x[x, StarhalmaBoardGui.fieldCoordinates[fieldIdx].x],
-                ::y[y, StarhalmaBoardGui.fieldCoordinates[fieldIdx].y],
+                ::x[x, p.x],
+                ::y[y, p.y],
                 time = HALF_MOVE_TIME
             )
-            xy(fieldIdx)
+            xy(p)
         }
         unTip()
 
     }
 
-    suspend fun moveTo(fieldIdx: Int) {
+    suspend fun moveTo(p: Point) {
         tip()
         tween(
-            ::x[x, StarhalmaBoardGui.fieldCoordinates[fieldIdx].x],
-            ::y[y, StarhalmaBoardGui.fieldCoordinates[fieldIdx].y],
+            ::x[x, p.x],
+            ::y[y, p.y],
             time = MOVE_TIME
         )
         unTip()
-        xy(fieldIdx)
+        xy(p)
     }
 }
