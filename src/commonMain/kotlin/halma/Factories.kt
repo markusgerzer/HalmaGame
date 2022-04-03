@@ -1,9 +1,6 @@
 package halma
 
 import gui.BoardGui
-import gui.StarhalmaBoardGui
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KFunction3
 
 
 fun <T: Board>makeBoard(Board: () -> T, numberOfPlayers: Int) = Board().apply {
@@ -13,43 +10,26 @@ fun <T: Board>makeBoard(Board: () -> T, numberOfPlayers: Int) = Board().apply {
     }
 }
 
-/*
-fun makeGame(
-    Board: () -> Board,
-    playerClasses: List<(Int, Board, List<Int>) -> Player>,
-    block: Game.()->Unit = { }
-): Game {
-    makeBoard(Board, playerClasses.size).apply {
+fun <B: Board>makeGame(
+    boardClass: () -> B,
+    playerClasses: List<(Int, B, List<Int>) -> Player<B>>,
+    block: suspend Game<B>.() -> Unit
+): Game<B> {
+    makeBoard(boardClass, playerClasses.size).apply {
         val players = playerClasses.mapIndexed { i, Player ->
             Player(i + 1, this, idToHomeMaps[playerClasses.size - 1][i + 1]!!)
         }
         return Game(this, players, block)
     }
-}*/
-
-/*
-fun <D: Board, B: Board>makeGame(
-    decorator: (B) -> D,
-    Board: () -> B,
-    playerClasses: List<(Int, Board, List<Int>) -> Player>,
-    block: Game.()->Unit = { }
-): Game {
-    makeBoard(Board, playerClasses.size).apply {
-        val boardGui = decorator(this)
-        val players = playerClasses.mapIndexed { i, Player ->
-            Player(i + 1, this, idToHomeMaps[playerClasses.size - 1][i + 1]!!)
-        }
-        return Game(boardGui, players, block)
-    }
-}*/
+}
 
 fun <D: BoardGui, B: Board>makeGame(
     decorator: (B) -> D,
-    Board: () -> B,
-    playerClasses: List<(Int, D, List<Int>) -> Player<D>>,//List<KFunction3<Int, BoardGui, List<Int>, Player<out Board>>>,
+    boardClass: () -> B,
+    playerClasses: List<(Int, D, List<Int>) -> Player<D>>,
     block: suspend Game<D>.()->Unit = { }
 ): Game<D> {
-    makeBoard(Board, playerClasses.size).apply {
+    makeBoard(boardClass, playerClasses.size).apply {
         val boardGui = decorator(this)
         val players = playerClasses.mapIndexed { i, Player ->
             Player(i + 1, boardGui, idToHomeMaps[playerClasses.size - 1][i + 1]!!)

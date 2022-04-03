@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class Board_validMoveOfOrNull_Test {
-    val board = makeBoard(::StarhalmaBoard, 1)
+    private val board = makeBoard(::StarhalmaBoard, 1)
 
     @Test
     fun simpleTest() {

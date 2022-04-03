@@ -1,6 +1,5 @@
 import com.soywiz.klock.seconds
 import com.soywiz.korge.Korge
-import com.soywiz.korge.time.delay
 import com.soywiz.korge.tween.get
 import com.soywiz.korge.tween.tween
 import com.soywiz.korim.color.Colors
@@ -11,7 +10,6 @@ import gui.starhalmaBoardGui
 import halma.PlayerStupidAI
 import halma.StarhalmaBoard
 import halma.makeGame
-import kotlinx.coroutines.delay
 
 
 suspend fun main() = Korge(
