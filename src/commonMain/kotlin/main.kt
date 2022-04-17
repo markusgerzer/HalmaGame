@@ -7,9 +7,7 @@ import com.soywiz.korma.geom.degrees
 import gui.PlayerGui
 import gui.StarhalmaBoardGui
 import gui.starhalmaBoardGui
-import halma.PlayerStupidAI
-import halma.StarhalmaBoard
-import halma.makeGame
+import halma.*
 
 
 suspend fun main() = Korge(
@@ -29,7 +27,11 @@ suspend fun main() = Korge(
         //listOf(::PlayerStupidAI, ::PlayerGui)
         //listOf(::PlayerStupidAI)
         //listOf(::PlayerGui)
-        listOf(::PlayerGui, ::PlayerStupidAI)
+        //listOf(::PlayerAI)
+        listOf(::PlayerAI, ::PlayerAI)
+        //listOf(::PlayerGui, ::PlayerStupidAI)
+        //listOf(::PlayerAI, ::PlayerStupidAI)
+        //listOf(::PlayerAI, ::PlayerGui)
     ) {
         /*board as StarhalmaBoardGui
         board.tween(
@@ -37,15 +39,34 @@ suspend fun main() = Korge(
             time = 2.seconds
         )
         d = (d + 60) % 360*/
+        /*println()
+        println("==========")
+        println(round)
+        println("==========")*/
     }
 
+    /*
     game.board as StarhalmaBoardGui
     game.board.tween(
         game.board::spin[d.degrees],
         time = 3.seconds
     )
+     */
 
     game.start()
 
+    /*
+    val fields = intArrayOf(
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
+    )
+    val board = StarhalmaBoardGui(1, StarhalmaBoard(1, fields))
+    val game = Game(board, listOf(PlayerAI(1, StarhalmaStaticBoardMappings.idToHomeMaps[0][1]!!)))
+    game.players.forEach { it.game = game }
+    game.start()
 
+     */
 }
+

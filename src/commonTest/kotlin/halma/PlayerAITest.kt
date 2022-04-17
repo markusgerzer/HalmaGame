@@ -1,27 +1,75 @@
 package halma
 
+import com.soywiz.klock.TimeSpan
+import com.soywiz.klock.measureTime
 import com.soywiz.korio.async.suspendTest
+import com.soywiz.korio.lang.portableSimpleName
 import kotlin.test.Test
 
 
 class PlayerAITest {
     @Test
-    fun singlePlayerSolveTest() {
+    fun solveTest() {
         println("===========================================")
-        singlePlayerSolve(::PlayerStupidAI, ::StarhalmaBoard)
+        runTest(
+            "${PlayerStupidAI::class.portableSimpleName} player = 1",
+            listOf(::PlayerStupidAI),
+            ::StarhalmaBoard)
+        println("===========================================")
+        runTest(
+            "${PlayerAI::class.portableSimpleName} player = 1",
+            listOf(::PlayerAI),
+            ::StarhalmaBoard)
+        println("===========================================")
+        runTest(
+            "${PlayerStupidAI::class.portableSimpleName} player = 2",
+            List(2) { :: PlayerStupidAI },
+            ::StarhalmaBoard)
+        println("===========================================")
+        runTest(
+            "${PlayerAI::class.portableSimpleName} player = 2",
+            List(2) { :: PlayerAI },
+            ::StarhalmaBoard)
         println("===========================================")
     }
 
-    private fun <B: Board>singlePlayerSolve(
-        playerClass: (Int, B, List<Int>) -> Player<B>,
-        boardClass: () -> B
-    ) = suspendTest {
+    private fun <B: Board>runTest(
+        name: String,
+        playerClasses: List<(Int, List<Int>) -> Player<B>>,
+        boardClass: (Int) -> B,
+        block: Player<B>.()->Unit = { }
+    ) = suspendTest(TimeSpan.NIL) {
         val game = makeGame(
             boardClass,
-            listOf(playerClass)
-        ) { }
-        print("${PlayerStupidAI::class.simpleName}: ")
-        game.start()
-        println("Needed ${game.round} rounds to solve.")
+            playerClasses,
+        ) {
+            if (round >= 100) {
+                println(board.fields.toList())
+                displayStarhalmaFields(board.fields.toList())
+                throw Exception()
+            }
+        }
+        game.players.forEach{ it.apply(block) }
+        val time = measureTime { game.start() }
+        print("$name: ")
+        println("Needed ${game.round} rounds and ${time.seconds} seconds to solve.")
+    }
+
+    @Test
+    fun lastMoveTest() {
+        suspendTest {
+            val fields = intArrayOf(
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
+            )
+            val player = PlayerAI<StarhalmaBoard>(1, StarhalmaStaticBoardMappings.idToHomeMaps[0][1]!!)
+            val board = StarhalmaBoard(1, fields)
+            val game = Game(board, listOf(player)) { displayStarhalmaFields(fields.toList()) }
+            game.players.forEach { it.game = game }
+            displayStarhalmaFields(fields.toList())
+            game.start()
+        }
     }
 }

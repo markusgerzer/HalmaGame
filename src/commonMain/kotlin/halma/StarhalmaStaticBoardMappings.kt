@@ -103,7 +103,7 @@ object StarhalmaStaticBoardMappings: StaticBoardMappings {
         listOf( 10,  11,  12,  13,  14,  23,  24,  25,  26,  35,  36,  37,  46,  47,  56)    // home 6
     )
 
-    override val possibleNumberOfPlayers = (1..6).toList()
+    override val maxNumberOfPlayers = (1..6).toList()
 
     override val fieldDistances =
         List(fieldsSize) { idx1 ->

@@ -1,9 +1,11 @@
 package halma
 
 interface Board : StaticBoardMappings {
+    val numberOfPlayers: Int
     val fields: IntArray
 
-    fun possibleMoves(fieldIdx: Int): List<Move>
+    fun copyOf(): Board
+    fun possibleMoves(startIdx: Int): List<Move>
     fun possibleMovesOfPlayerNr(id: Int): List<Move>
     fun isValidMove(move: Move): Boolean
     suspend fun move(move: Move)
@@ -32,7 +34,7 @@ interface StaticBoardMappings {
     val fieldVarieties: List<Int>
     val fieldNeighbors: List<List<Int>>
     val fieldDistances: List<List<Int>>
-    val possibleNumberOfPlayers: List<Int>
+    val maxNumberOfPlayers: List<Int>
     val idToHomeMaps: List<Map<Int, List<Int>>>
     val idToStartMaps: List<Map<Int, List<Int>>>
 }

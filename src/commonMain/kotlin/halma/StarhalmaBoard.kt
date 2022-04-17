@@ -1,10 +1,12 @@
 package halma
 
-class StarhalmaBoard :
-    Board,
+class StarhalmaBoard(
+    override val numberOfPlayers: Int,
+    override val fields: IntArray = IntArray(StarhalmaStaticBoardMappings.fieldsSize)
+) : Board,
     StaticBoardMappings by StarhalmaStaticBoardMappings
 {
-    override val fields = IntArray(fieldsSize)
+    override fun copyOf() = StarhalmaBoard(numberOfPlayers, fields.copyOf())
 
     private fun possibleWalks(startIdx: Int): List<Move.Walk> {
         val possibleMoves = mutableListOf<Move.Walk>()

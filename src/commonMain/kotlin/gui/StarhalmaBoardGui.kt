@@ -30,11 +30,13 @@ interface BoardGui: Board {
 }
 
 fun Container.starhalmaBoardGui(
-    starhalmaBoard: StarhalmaBoard = StarhalmaBoard()
-) = StarhalmaBoardGui(starhalmaBoard).addTo(this)
+    numberOfPlayers: Int,
+    starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers)
+) = StarhalmaBoardGui(numberOfPlayers, starhalmaBoard).addTo(this)
 
 class StarhalmaBoardGui(
-    private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard()
+    numberOfPlayers: Int,
+    private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers)
 ): Container(), Board by starhalmaBoard, BoardGui {
     init { scaleY = 0.82 }
 

@@ -1,36 +1,36 @@
 package gui
 
 import com.soywiz.korge.input.onClick
+import halma.Game
 import halma.Move
 import halma.Player
 import kotlinx.coroutines.channels.Channel
 
 class PlayerGui<T: BoardGui>(
     override val id: Int,
-    override val board: T,
     override val home: List<Int>
 ) : Player<T> {
-    private val playerPans: List<Pan>
-    init {
-        val panList = mutableListOf<Pan>()
-        for (i in board.fields.indices) {
-            if (board.fields[i] == id) panList.add(board.panAt(i))
+    override lateinit var game: Game<T>
+
+    private val playerPans: List<Pan> by lazy {
+        game.board.goButton.let{
+            it.onClick {
+                game.board.validMoveOfOrNull(idxList)?.let { move -> channel.send(move) }
+            }
         }
-        playerPans = panList
+
+        val panList = mutableListOf<Pan>()
+        for (i in game.board.fields.indices) {
+            if (game.board.fields[i] == id) panList.add(game.board.panAt(i))
+        }
+        panList
     }
 
     private val channel = Channel<Move>(0)
     private var idxList = listOf<Int>()
-    init {
-        board.goButton.let{
-            it.onClick {
-                board.validMoveOfOrNull(idxList)?.let { move -> channel.send(move) }
-            }
-        }
-    }
 
     fun goButtonEnable() {
-        board.goButton.let {
+        game.board.goButton.let {
             it.visible = true
             it.enabled = true
 
@@ -38,7 +38,7 @@ class PlayerGui<T: BoardGui>(
     }
 
     fun goButtonDisable() {
-        board.goButton.run {
+        game.board.goButton.run {
             visible = false
             enabled = false
         }
@@ -48,17 +48,17 @@ class PlayerGui<T: BoardGui>(
         if (idxList.isEmpty()) return
 
         if (idxList.last() == fieldGui.idx) {
-            if (idxList.size == 1) panSelect(board.panAt(idxList[0]))
+            if (idxList.size == 1) panSelect(game.board.panAt(idxList[0]))
             else {
-                board.guiFields[fieldGui.idx].unMark()
+                game.board.guiFields[fieldGui.idx].unMark()
                 idxList = idxList.dropLast(1)
-                val move = board.validMoveOfOrNull(idxList)
+                val move = game.board.validMoveOfOrNull(idxList)
                 if (move == null) goButtonDisable()
                 else goButtonEnable()
             }
         }
         else {
-            val move = board.validMoveOfOrNull(idxList + fieldGui.idx)
+            val move = game.board.validMoveOfOrNull(idxList + fieldGui.idx)
             if (move != null) {
                 idxList += fieldGui.idx
                 fieldGui.mark()
@@ -68,17 +68,17 @@ class PlayerGui<T: BoardGui>(
     }
 
     suspend fun panSelect(pan: Pan) {
-        if (board.possibleMoves(pan.fieldIdx).isEmpty()) return
+        if (game.board.possibleMoves(pan.fieldIdx).isEmpty()) return
 
         if (idxList.isNotEmpty()) {
-            for (idx in idxList) board.guiFields[idx].unMark()
-            val selectedPan = board.panAt(idxList[0])
+            for (idx in idxList) game.board.guiFields[idx].unMark()
+            val selectedPan = game.board.panAt(idxList[0])
             if (selectedPan !== pan) selectedPan.unTip()
         }
         goButtonDisable()
         idxList = listOf(pan.fieldIdx)
         pan.tip()
-        board.guiFields[pan.fieldIdx].mark()
+        game.board.guiFields[pan.fieldIdx].mark()
     }
 
     fun setPansOnClick(block: (suspend(Pan) -> Unit)?) {
@@ -88,7 +88,7 @@ class PlayerGui<T: BoardGui>(
     }
 
     fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)?) {
-        for (guiField in board.guiFields) {
+        for (guiField in game.board.guiFields) {
             guiField.onClickCallback = block
         }
     }
@@ -103,7 +103,7 @@ class PlayerGui<T: BoardGui>(
         setGuiFieldsOnClick(null)
         goButtonDisable()
         for (idx in idxList) {
-            board.guiFields[idx].unMark()
+            game.board.guiFields[idx].unMark()
         }
         idxList = emptyList()
 

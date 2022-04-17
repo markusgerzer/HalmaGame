@@ -2,12 +2,13 @@ package halma
 
 class PlayerStupidAI<T: Board>(
     override val id: Int,
-    override val board: T,
     override val home: List<Int>
 ) : Player<T> {
+    override lateinit var game: Game<T>
+
     override suspend fun makeMove(): Move {
-        val fieldsCopy = board.fields.copyOf()
-        val possibleMoves = board.possibleMovesOfPlayerNr(id)
+        val fieldsCopy = game.board.fields.copyOf()
+        val possibleMoves = game.board.possibleMovesOfPlayerNr(id)
         var minDistance = Int.MAX_VALUE
         var minDistanceI = -1
 
@@ -31,7 +32,7 @@ class PlayerStupidAI<T: Board>(
         val freeHomeFields = home.filterNot { fields[it] == id }
         var distance = 0
         for (i in pansNotAtHome.indices) {
-            distance += board.fieldDistances[pansNotAtHome[i]][freeHomeFields[i]]
+            distance += game.board.fieldDistances[pansNotAtHome[i]][freeHomeFields[i]]
         }
         return distance
     }
