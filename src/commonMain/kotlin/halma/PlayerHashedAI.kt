@@ -1,13 +1,15 @@
 package halma
 
+import com.soywiz.kds.CacheMap
 import com.soywiz.klock.*
 import com.soywiz.klogger.Console
 import com.soywiz.korio.async.delay
 import com.soywiz.korio.async.launch
 import kotlinx.coroutines.*
+import kotlin.random.Random
 
 
-open class PlayerAI<T: Board>(
+class PlayerHashedAI<T: Board>(
     override val id: Int,
     override val home: List<Int>
 ) : Player<T> {
@@ -19,8 +21,29 @@ open class PlayerAI<T: Board>(
 
     private var calculated = 0
     private var cutoffs = 0
+    private var hashed = 0
+
+    val zobristTable by lazy {
+        LongArray(game.board.numberOfPlayers * game.board.fields.size) { Random.nextLong() }
+    }
+    var zobristHash = 0L
+    val cachedRates = CacheMap<Long, Int>(100_000)
+
+    fun initZobristHash() {
+        zobristHash = 0L
+        for ((i, playerId) in game.board.fields.withIndex()) {
+            if (playerId > 0) updateZobristHash(playerId, i)
+        }
+    }
+
+    fun updateZobristHash(playerId: Int, fieldIdx: Int) {
+        val idx = (playerId - 1) * game.board.fields.size + fieldIdx
+        zobristHash = zobristHash xor zobristTable[idx]
+    }
 
     override suspend fun makeMove(): Move {
+        initZobristHash()
+
         var depth = 1
         var move: Move = evaluate(depth)
         Console.log(move)
@@ -47,6 +70,7 @@ open class PlayerAI<T: Board>(
 
         calculated = 0
         cutoffs = 0
+        hashed = 0
 
         var bestResult = Int.MIN_VALUE
         val bestMoves = mutableListOf<Move>()
@@ -62,7 +86,10 @@ open class PlayerAI<T: Board>(
             }
         }
 
-        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   depth: $depth    result: $bestResult")
+        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   hashed: $hashed   cached: ${cachedRates.size}   depth: $depth    result: $bestResult")
+        //val hashTimeD = hashTime / hashed
+        //val rateTimeD = rateTime / calculated
+        //Console.log("hashTimeD: $hashTimeD   rateTimeD: $rateTimeD")
         if (bestMoves.isEmpty()) throw IllegalStateException("Can not move!")
         return bestMoves.random()
     }
@@ -110,13 +137,40 @@ open class PlayerAI<T: Board>(
             yield()
             boardCopy.fields[move.startFieldIdx] = 0
             boardCopy.fields[move.destFieldIdx] = playerId
+            updateZobristHash(playerId, move.startFieldIdx)
+            updateZobristHash(playerId, move.destFieldIdx)
             block(move)
             boardCopy.fields[move.destFieldIdx] = 0
             boardCopy.fields[move.startFieldIdx] = playerId
+            updateZobristHash(playerId, move.startFieldIdx)
+            updateZobristHash(playerId, move.destFieldIdx)
         }
     }
 
+    /*
+    var hashTime = TimeSpan.ZERO
+    var rateTime = TimeSpan.ZERO
     private fun rateBoard(): Int {
+        val (r, t) = measureTimeWithResult { boardRates[zobristHash] }
+        return if (r != null) {
+            hashTime += t
+            hashed++
+            r
+        } else {
+            val (r2, t) = measureTimeWithResult { rate() }
+            rateTime += t
+            r2
+        }
+    }
+     */
+
+    private fun rateBoard(): Int {
+        val rating = cachedRates[zobristHash] ?: return rate()
+        hashed++
+        return rating
+    }
+
+    private fun rate(): Int {
         calculated++
         val pansNotAtHome = Array(game.players.size) { mutableListOf<Int>() }
         for ((idx, playerId) in boardCopy.fields.withIndex()) {
@@ -128,7 +182,7 @@ open class PlayerAI<T: Board>(
             player.home.filterNot { boardCopy.fields[it] == player.id }
         }
 
-        val distanceSum = fun(playerId: Int): Int {
+        val distanceSum = fun (playerId: Int): Int {
             var distance = 0
             for (i in pansNotAtHome[playerId - 1].indices) {
                 distance += boardCopy.fieldDistances[pansNotAtHome[playerId - 1][i]][freeHomeFields[playerId - 1][i]]
@@ -143,7 +197,9 @@ open class PlayerAI<T: Board>(
             minPlayerRate = maxOf(minPlayerRate, distanceSum(i))
         }
 
-        return maxPlayerRate - minPlayerRate
+        val rate = maxPlayerRate - minPlayerRate
+        cachedRates[zobristHash] = rate
+        return rate
     }
 
     private fun willWin(playerId: Int): Boolean {

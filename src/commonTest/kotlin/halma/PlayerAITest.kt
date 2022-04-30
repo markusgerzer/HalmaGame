@@ -22,6 +22,11 @@ class PlayerAITest {
             ::StarhalmaBoard)
         println("===========================================")
         runTest(
+            "${PlayerHashedAI::class.portableSimpleName} player = 1",
+            listOf(::PlayerHashedAI),
+            ::StarhalmaBoard)
+        println("===========================================")
+        runTest(
             "${PlayerStupidAI::class.portableSimpleName} player = 2",
             List(2) { :: PlayerStupidAI },
             ::StarhalmaBoard)
@@ -29,6 +34,11 @@ class PlayerAITest {
         runTest(
             "${PlayerAI::class.portableSimpleName} player = 2",
             List(2) { :: PlayerAI },
+            ::StarhalmaBoard)
+        println("===========================================")
+        runTest(
+            "${PlayerHashedAI::class.portableSimpleName} player = 2",
+            List(2) { :: PlayerHashedAI },
             ::StarhalmaBoard)
         println("===========================================")
     }
@@ -71,5 +81,22 @@ class PlayerAITest {
             displayStarhalmaFields(fields.toList())
             game.start()
         }
+    }
+
+    @Test
+    fun zobristHashTest() = suspendTest {
+        val game = makeGame(::StarhalmaBoard, listOf(::PlayerHashedAI)) { }
+        val player = game.players[0] as PlayerHashedAI
+        println(player.zobristTable.toList())
+        println(player.zobristHash)
+        player.updateZobristHash(1, 14)
+        player.updateZobristHash(1, 27)
+        println(player.zobristHash)
+        player.updateZobristHash(1, 27)
+        player.updateZobristHash(1, 14)
+        println(player.zobristHash)
+        player.updateZobristHash(1, 14)
+        player.updateZobristHash(1, 27)
+        println(player.zobristHash)
     }
 }

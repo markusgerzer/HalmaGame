@@ -22,16 +22,18 @@ suspend fun main() = Korge(
     val game = makeGame(
         ::starhalmaBoardGui,
         ::StarhalmaBoard,
+        //List(6) { ::PlayerAI }
         //List(6) { ::PlayerStupidAI }
         //List(6) { ::PlayerGui }
         //listOf(::PlayerStupidAI, ::PlayerGui)
         //listOf(::PlayerStupidAI)
         //listOf(::PlayerGui)
         //listOf(::PlayerAI)
-        listOf(::PlayerAI, ::PlayerAI)
+        //listOf(::PlayerStupidAI, ::PlayerAI)
         //listOf(::PlayerGui, ::PlayerStupidAI)
-        //listOf(::PlayerAI, ::PlayerStupidAI)
+        listOf(::PlayerAI, ::PlayerHashedAI)
         //listOf(::PlayerAI, ::PlayerGui)
+        //listOf(::PlayerGui, ::PlayerAI)
     ) {
         /*board as StarhalmaBoardGui
         board.tween(
@@ -45,13 +47,11 @@ suspend fun main() = Korge(
         println("==========")*/
     }
 
-    /*
-    game.board as StarhalmaBoardGui
+    /*game.board as StarhalmaBoardGui
     game.board.tween(
         game.board::spin[d.degrees],
         time = 3.seconds
-    )
-     */
+    )*/
 
     game.start()
 
