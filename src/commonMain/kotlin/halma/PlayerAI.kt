@@ -13,12 +13,13 @@ open class PlayerAI<T: Board>(
 ) : Player<T> {
     override lateinit var game: Game<T>
 
-    val thinkingTime = 500.milliseconds
+    val thinkingTime = 1000.milliseconds
 
     private lateinit var boardCopy: Board
 
     private var calculated = 0
     private var cutoffs = 0
+    private var filtered = 0
 
     override suspend fun makeMove(): Move {
         var depth = 1
@@ -46,6 +47,7 @@ open class PlayerAI<T: Board>(
         boardCopy = game.board.copyOf()
 
         calculated = 0
+        filtered = 0
         cutoffs = 0
 
         var bestResult = Int.MIN_VALUE
@@ -62,7 +64,7 @@ open class PlayerAI<T: Board>(
             }
         }
 
-        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   depth: $depth    result: $bestResult")
+        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   filtered: $filtered   depth: $depth    result: $bestResult")
         if (bestMoves.isEmpty()) throw IllegalStateException("Can not move!")
         return bestMoves.random()
     }
@@ -104,13 +106,16 @@ open class PlayerAI<T: Board>(
     }
 
     private suspend inline fun forAllPossibleMove(playerId: Int, block: (Move) -> Unit) {
+        val rate0 = rateBoard()
         val possibleMoves = boardCopy.possibleMovesOfPlayerNr(playerId)
 
         for (move in possibleMoves) {
             yield()
             boardCopy.fields[move.startFieldIdx] = 0
             boardCopy.fields[move.destFieldIdx] = playerId
-            block(move)
+            val rate1 = rateBoard()
+            if (rate1 >= rate0) block(move)
+            else filtered++
             boardCopy.fields[move.destFieldIdx] = 0
             boardCopy.fields[move.startFieldIdx] = playerId
         }

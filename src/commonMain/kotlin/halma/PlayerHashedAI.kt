@@ -15,13 +15,14 @@ class PlayerHashedAI<T: Board>(
 ) : Player<T> {
     override lateinit var game: Game<T>
 
-    val thinkingTime = 500.milliseconds
+    val thinkingTime = 1000.milliseconds
 
     private lateinit var boardCopy: Board
 
     private var calculated = 0
     private var cutoffs = 0
     private var hashed = 0
+    private var filtered = 0
 
     val zobristTable by lazy {
         LongArray(game.board.numberOfPlayers * game.board.fields.size) { Random.nextLong() }
@@ -70,6 +71,7 @@ class PlayerHashedAI<T: Board>(
 
         calculated = 0
         cutoffs = 0
+        filtered = 0
         hashed = 0
 
         var bestResult = Int.MIN_VALUE
@@ -86,7 +88,7 @@ class PlayerHashedAI<T: Board>(
             }
         }
 
-        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   hashed: $hashed   cached: ${cachedRates.size}   depth: $depth    result: $bestResult")
+        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   filtered: $filtered   hashed: $hashed   cached: ${cachedRates.size}   depth: $depth    result: $bestResult")
         //val hashTimeD = hashTime / hashed
         //val rateTimeD = rateTime / calculated
         //Console.log("hashTimeD: $hashTimeD   rateTimeD: $rateTimeD")
@@ -131,6 +133,7 @@ class PlayerHashedAI<T: Board>(
     }
 
     private suspend inline fun forAllPossibleMove(playerId: Int, block: (Move) -> Unit) {
+        val rate0 = rateBoard()
         val possibleMoves = boardCopy.possibleMovesOfPlayerNr(playerId)
 
         for (move in possibleMoves) {
@@ -139,7 +142,9 @@ class PlayerHashedAI<T: Board>(
             boardCopy.fields[move.destFieldIdx] = playerId
             updateZobristHash(playerId, move.startFieldIdx)
             updateZobristHash(playerId, move.destFieldIdx)
-            block(move)
+            val rate1 = rateBoard()
+            if (rate1 >= rate0) block(move)
+            else filtered++
             boardCopy.fields[move.destFieldIdx] = 0
             boardCopy.fields[move.startFieldIdx] = playerId
             updateZobristHash(playerId, move.startFieldIdx)

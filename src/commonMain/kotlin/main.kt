@@ -1,5 +1,8 @@
 import com.soywiz.klock.seconds
+import com.soywiz.klogger.Console
 import com.soywiz.korge.Korge
+import com.soywiz.korge.input.onScroll
+import com.soywiz.korge.input.onSwipe
 import com.soywiz.korge.tween.get
 import com.soywiz.korge.tween.tween
 import com.soywiz.korim.color.Colors
@@ -31,8 +34,9 @@ suspend fun main() = Korge(
         //listOf(::PlayerAI)
         //listOf(::PlayerStupidAI, ::PlayerAI)
         //listOf(::PlayerGui, ::PlayerStupidAI)
-        listOf(::PlayerAI, ::PlayerHashedAI)
-        //listOf(::PlayerAI, ::PlayerGui)
+        //listOf(::PlayerAI, ::PlayerHashedAI)
+        listOf(::PlayerAI, :: PlayerGui)
+        //listOf(::PlayerHashedAI, ::PlayerGui)
         //listOf(::PlayerGui, ::PlayerAI)
     ) {
         /*board as StarhalmaBoardGui
@@ -54,19 +58,5 @@ suspend fun main() = Korge(
     )*/
 
     game.start()
-
-    /*
-    val fields = intArrayOf(
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
-    )
-    val board = StarhalmaBoardGui(1, StarhalmaBoard(1, fields))
-    val game = Game(board, listOf(PlayerAI(1, StarhalmaStaticBoardMappings.idToHomeMaps[0][1]!!)))
-    game.players.forEach { it.game = game }
-    game.start()
-
-     */
 }
 
