@@ -1,16 +1,11 @@
-import com.soywiz.klock.seconds
-import com.soywiz.klogger.Console
 import com.soywiz.korge.Korge
-import com.soywiz.korge.input.onScroll
-import com.soywiz.korge.input.onSwipe
-import com.soywiz.korge.tween.get
-import com.soywiz.korge.tween.tween
 import com.soywiz.korim.color.Colors
-import com.soywiz.korma.geom.degrees
-import gui.PlayerGui
 import gui.StarhalmaBoardGui
 import gui.starhalmaBoardGui
-import halma.*
+import halma.PlayerAI
+import halma.PlayerHashedAI
+import halma.StarhalmaBoard
+import halma.makeGame
 
 
 suspend fun main() = Korge(
@@ -21,7 +16,7 @@ suspend fun main() = Korge(
 ) {
     StarhalmaBoardGui.initialize()
 
-    var d = 180
+    //var d = 180
     val game = makeGame(
         ::starhalmaBoardGui,
         ::StarhalmaBoard,
@@ -34,8 +29,8 @@ suspend fun main() = Korge(
         //listOf(::PlayerAI)
         //listOf(::PlayerStupidAI, ::PlayerAI)
         //listOf(::PlayerGui, ::PlayerStupidAI)
-        //listOf(::PlayerAI, ::PlayerHashedAI)
-        listOf(::PlayerAI, :: PlayerGui)
+        listOf(::PlayerAI, ::PlayerHashedAI)
+        //listOf(::PlayerAI, :: PlayerGui)
         //listOf(::PlayerHashedAI, ::PlayerGui)
         //listOf(::PlayerGui, ::PlayerAI)
     ) {

@@ -13,13 +13,13 @@ open class PlayerAI<T: Board>(
 ) : Player<T> {
     override lateinit var game: Game<T>
 
-    val thinkingTime = 1000.milliseconds
+    val thinkingTime = 1_000.milliseconds
 
-    private lateinit var boardCopy: Board
+    protected lateinit var boardCopy: Board
 
-    private var calculated = 0
-    private var cutoffs = 0
-    private var filtered = 0
+    protected var calculated = 0
+    protected var cutoffs = 0
+    protected var filtered = 0
 
     override suspend fun makeMove(): Move {
         var depth = 1
@@ -41,7 +41,11 @@ open class PlayerAI<T: Board>(
         return move
     }
 
-    private suspend fun evaluate(depth: Int): Move {
+    protected open fun logMove(depth: Int, bestResult: Int) {
+        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   filtered: $filtered   depth: $depth    result: $bestResult")
+    }
+
+    protected open suspend fun evaluate(depth: Int): Move {
         require(depth > 0)
 
         boardCopy = game.board.copyOf()
@@ -64,12 +68,12 @@ open class PlayerAI<T: Board>(
             }
         }
 
-        Console.log("round: ${game.round}   id: $id   calculated: $calculated   cutoffs: $cutoffs   filtered: $filtered   depth: $depth    result: $bestResult")
+        logMove(depth, bestResult)
         if (bestMoves.isEmpty()) throw IllegalStateException("Can not move!")
         return bestMoves.random()
     }
 
-    private suspend fun evaluate(depth: Int, playerId: Int, alpha: Int, beta: Int): Int {
+    protected suspend fun evaluate(depth: Int, playerId: Int, alpha: Int, beta: Int): Int {
         if (willWin(playerId)) {
             return if (playerId == id) MAX_RATING else -MAX_RATING
         }
@@ -105,6 +109,8 @@ open class PlayerAI<T: Board>(
         }
     }
 
+    protected open fun hook(playerId: Int, vararg fieldIdx: Int) {}
+
     private suspend inline fun forAllPossibleMove(playerId: Int, block: (Move) -> Unit) {
         val rate0 = rateBoard()
         val possibleMoves = boardCopy.possibleMovesOfPlayerNr(playerId)
@@ -113,15 +119,17 @@ open class PlayerAI<T: Board>(
             yield()
             boardCopy.fields[move.startFieldIdx] = 0
             boardCopy.fields[move.destFieldIdx] = playerId
+            hook(playerId, move.startFieldIdx, move.destFieldIdx)
             val rate1 = rateBoard()
             if (rate1 >= rate0) block(move)
             else filtered++
             boardCopy.fields[move.destFieldIdx] = 0
             boardCopy.fields[move.startFieldIdx] = playerId
+            hook(playerId, move.startFieldIdx, move.destFieldIdx)
         }
     }
 
-    private fun rateBoard(): Int {
+    protected open fun rateBoard(): Int {
         calculated++
         val pansNotAtHome = Array(game.players.size) { mutableListOf<Int>() }
         for ((idx, playerId) in boardCopy.fields.withIndex()) {
