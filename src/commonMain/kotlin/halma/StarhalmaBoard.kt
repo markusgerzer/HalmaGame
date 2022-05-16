@@ -8,51 +8,44 @@ class StarhalmaBoard(
 {
     override fun copyOf() = StarhalmaBoard(numberOfPlayers, fields.copyOf())
 
-    private fun possibleWalks(startIdx: Int): List<Move.Walk> {
-        val possibleMoves = mutableListOf<Move.Walk>()
+    private fun possibleWalks(startIdx: Int) = sequence {
         for (destIdx in fieldNeighbors[startIdx]) {
             if (destIdx >= 0 && fields[destIdx] == 0)
-                possibleMoves.add(Move.Walk(startIdx, destIdx))
+                yield(Move.Walk(startIdx, destIdx))
         }
-        return possibleMoves
     }
 
-    private fun possibleJumps(startIdx: Int, visitedIdx: List<Int> = listOf(startIdx)): List<Move.Jump> {
-        val possibleMoves = mutableListOf<Move.Jump>()
+    private fun possibleJumps(startIdx: Int, visitedIdx: List<Int> = listOf(startIdx)): Sequence<Move.Jump> = sequence {
         for (direction in directions) {
             val overJumpedIdx = fieldNeighbors[startIdx][direction]
             if (overJumpedIdx >= 0 && fields[overJumpedIdx] > 0) {
                 val destIdx = fieldNeighbors[overJumpedIdx][direction]
                 if (destIdx >= 0 && fields[destIdx] == 0) {
                     if (destIdx !in visitedIdx) {
-                        possibleMoves.add(Move.Jump(startIdx, listOf(destIdx), destIdx))
+                        yield(Move.Jump(startIdx, listOf(destIdx), destIdx))
 
                         val furtherJumps = possibleJumps(destIdx, visitedIdx + destIdx)
                         val furtherMoves = furtherJumps.map {
                             Move.Jump(startIdx, listOf(destIdx) + it.destFieldIdxList, it.destFieldIdx)
                         }
-                        possibleMoves.addAll(furtherMoves)
+                        yieldAll(furtherMoves)
                     }
                 }
             }
         }
-        return possibleMoves
     }
 
-    override fun possibleMoves(startIdx: Int): List<Move> {
+    override fun possibleMoves(startIdx: Int): Sequence<Move> {
         require(fields[startIdx] > 0)
-        return possibleWalks(startIdx) + possibleJumps(startIdx)
+        return possibleJumps(startIdx) + possibleWalks(startIdx)
     }
 
-    override fun possibleMovesOfPlayerNr(id: Int): List<Move> {
-        val moves = mutableListOf<Move>()
+    override fun possibleMovesOfPlayerNr(id: Int) =  sequence<Move> {
         val startIdxList = fields.indices.filter { fields[it] == id }
         for (startIdx in startIdxList) {
-            moves.addAll(possibleMoves(startIdx))
+            yieldAll(possibleMoves(startIdx))
         }
-        return moves
     }
-
 
     private fun isValidWalk(walk: Move.Walk) =
         walk.destFieldIdx in fieldNeighbors[walk.startFieldIdx]

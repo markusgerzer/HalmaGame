@@ -68,7 +68,7 @@ class PlayerGui<T: BoardGui>(
     }
 
     suspend fun panSelect(pan: Pan) {
-        if (game.board.possibleMoves(pan.fieldIdx).isEmpty()) return
+        if (game.board.possibleMoves(pan.fieldIdx).toList().isEmpty()) return
 
         if (idxList.isNotEmpty()) {
             for (idx in idxList) game.board.guiFields[idx].unMark()

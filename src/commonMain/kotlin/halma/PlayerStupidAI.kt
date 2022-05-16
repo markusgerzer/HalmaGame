@@ -8,7 +8,7 @@ class PlayerStupidAI<T: Board>(
 
     override suspend fun makeMove(): Move {
         val fieldsCopy = game.board.fields.copyOf()
-        val possibleMoves = game.board.possibleMovesOfPlayerNr(id)
+        val possibleMoves = game.board.possibleMovesOfPlayerNr(id).toList()
         var minDistance = Int.MAX_VALUE
         var minDistanceI = -1
 

@@ -5,8 +5,8 @@ interface Board : StaticBoardMappings {
     val fields: IntArray
 
     fun copyOf(): Board
-    fun possibleMoves(startIdx: Int): List<Move>
-    fun possibleMovesOfPlayerNr(id: Int): List<Move>
+    fun possibleMoves(startIdx: Int): Sequence<Move>
+    fun possibleMovesOfPlayerNr(id: Int): Sequence<Move>
     fun isValidMove(move: Move): Boolean
     suspend fun move(move: Move)
 
