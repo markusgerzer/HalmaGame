@@ -23,6 +23,8 @@ interface Board : StaticBoardMappings {
 
         return null
     }
+
+    fun hookBeforeMove(player: Player<out Board>) {}
 }
 
 interface StaticBoardMappings {

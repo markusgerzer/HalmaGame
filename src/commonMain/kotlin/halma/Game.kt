@@ -10,6 +10,7 @@ class Game<T: Board>(
     suspend fun start() {
         while (true) {
             for (player in players) {
+                board.hookBeforeMove(player)
                 val move = player.makeMove()
                 board.move(move)
                 block()

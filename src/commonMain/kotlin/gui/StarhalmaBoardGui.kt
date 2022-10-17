@@ -1,11 +1,14 @@
 package gui
 
-import com.soywiz.korge.ui.UIButton
-import com.soywiz.korge.ui.uiButton
+import com.soywiz.korge.input.onClick
+import com.soywiz.korge.tween.get
+import com.soywiz.korge.tween.tween
+import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.Bitmap
 import com.soywiz.korim.color.Colors
 import com.soywiz.korim.format.readBitmap
+import com.soywiz.korim.text.TextAlignment
 import com.soywiz.korim.vector.StrokeInfo
 import com.soywiz.korio.file.std.resourcesVfs
 import com.soywiz.korma.geom.Angle
@@ -14,20 +17,11 @@ import com.soywiz.korma.geom.PointArrayList
 import com.soywiz.korma.geom.degrees
 import com.soywiz.korma.geom.vector.line
 import com.soywiz.korma.geom.vector.polygon
-import halma.Board
-import halma.Move
-import halma.StarhalmaBoard
-import halma.StarhalmaStaticBoardMappings
+import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
 import kotlin.math.sqrt
 
-
-interface BoardGui: Board {
-    val guiFields: List<FieldGui>
-    val goButton: UIButton
-    fun panAt(fieldIdx: Int): Pan
-}
 
 fun Container.starhalmaBoardGui(
     numberOfPlayers: Int,
@@ -44,18 +38,22 @@ class StarhalmaBoardGui(
         fun polygonOfCoordinateIndices(vararg indices: Int) {
             polygon(indices.map { i -> fieldCoordinates0[i] - Point(xFactor, yFactor) })
         }
+        // Red Homes
         fill(Colors.RED) {
             polygonOfCoordinateIndices(0, 18, 14)
             polygonOfCoordinateIndices(102, 106, 120)
         }
+        // Blue Homes
         fill(Colors.BLUE) {
             polygonOfCoordinateIndices(18, 22, 64)
             polygonOfCoordinateIndices(56, 102, 98)
         }
+        // Green Homes
         fill(Colors.GREEN) {
             polygonOfCoordinateIndices(64, 110, 106)
             polygonOfCoordinateIndices(10, 14, 56)
         }
+        // Lines
         stroke(Colors.BLACK, StrokeInfo(thickness = 3.0)) {
             for (i in 0 until StarhalmaStaticBoardMappings.fieldsSize) {
                 for (n in StarhalmaStaticBoardMappings.fieldNeighbors[i]) {
@@ -123,7 +121,7 @@ class StarhalmaBoardGui(
         val panList = mutableListOf<Pan>()
         for (i in 0 until fieldsSize) {
             if (fields[i] > 0) {
-                val pan = pan(panColors[fields[i] - 1]).xy(fieldCoordinates0[i])
+                val pan = pan(playerColors[fields[i] - 1]).xy(fieldCoordinates0[i])
                 pan.fieldIdx = i
                 panList.add(pan)
             }
@@ -134,9 +132,10 @@ class StarhalmaBoardGui(
     override val goButton = uiButton {
         enabled = false
         visible = false
-        xy(2000.0, 2400.0)
         scaledHeight = 230.0
         scaledWidth = 230.0
+        alignBottomToBottomOf(this@StarhalmaBoardGui, 150)
+        alignRightToRightOf(this@StarhalmaBoardGui, 250)
 
         image(goButtonIcon) {
             scaledHeight = 200.0
@@ -144,19 +143,78 @@ class StarhalmaBoardGui(
         }.centerOn(this)
     }
 
-    private fun spin(angle: Angle, fieldIdx: Int): Point {
+    private val spinClockwiseButton = uiButton {
+        scaledHeight = 230.0
+        scaledWidth = 230.0
+        alignTopToTopOf(this@StarhalmaBoardGui, 50)
+        alignLeftToLeftOf(this@StarhalmaBoardGui, 50)
+        onClick { tween(::spin[(spin.degrees + 60).degrees]) }
+
+        image(clockwiseIcon) {
+            scaledHeight = 200.0
+            scaledWidth = 200.0
+        }.centerOn(this)
+    }
+
+    private val spinAntiClockwiseButton = uiButton {
+        scaledHeight = 230.0
+        scaledWidth = 230.0
+        alignTopToTopOf(spinClockwiseButton)
+        alignLeftToRightOf(spinClockwiseButton, 50)
+        onClick { tween(::spin[(spin.degrees - 60).degrees]) }
+
+        image(antiClockwiseIcon) {
+            scaledHeight = 200.0
+            scaledWidth = 200.0
+        }.centerOn(this)
+    }
+
+    val roundText = uiText("Game starts") {
+        textSize = 80.0
+        textColor = Colors.BLACK
+        textAlignment = TextAlignment.RIGHT
+        alignTopToTopOf(this@StarhalmaBoardGui, 50)
+        alignRightToRightOf(this@StarhalmaBoardGui, 50)
+    }
+
+    private val msgBox = roundRect(900, 500, 20, 20) {
+        stroke = Colors.BLACK
+        strokeThickness = 20.0
+        alignBottomToBottomOf(this@StarhalmaBoardGui, 50)
+        alignLeftToLeftOf(this@StarhalmaBoardGui, 50)
+    }
+
+    private val msgText = uiText("") {
+        textSize = 96.0
+        textColor = Colors.BLACK
+        alignLeftToLeftOf(msgBox, 75)
+        alignTopToTopOf(msgBox, 75)
+    }
+
+    override fun hookBeforeMove(player: Player<out Board>) {
+        roundText.text = "Round ${player.game.round}"
+
+        val playerName = playerNames[player.id - 1]
+        msgText.text = when (player) {
+            is PlayerAI -> "$playerName player\n[Computer] makes\nhis move.\n"
+            is PlayerGui -> "$playerName player\nplease make\nyour move.\n"
+            else -> "???"
+        }
+    }
+
+    private fun spinF(angle: Angle, fieldIdx: Int): Point {
         val (angle0, r) = fieldPolar[fieldIdx]
         val angle1 = Angle.fromDegrees(angle0.degrees + angle.degrees - 180.0)
         return Point.fromPolar(midpoint, angle1, r)
     }
-    private fun Pan.spin(angle: Angle) { xy(spin(angle, fieldIdx)) }
-    private fun StarhalmaFieldGui.spin(angle: Angle) { xy(spin(angle, idx)) }
+    private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
+    private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
 
     var spin = 0.degrees
         set(value) {
             backg.rotation = value
-            guiFields.forEach { it.spin(value) }
-            pans.forEach { it.spin(value) }
+            guiFields.forEach { it.spinF(value) }
+            pans.forEach { it.spinF(value) }
             field = value
         }
 
@@ -165,13 +223,13 @@ class StarhalmaBoardGui(
         when (move) {
             is Move.Walk -> {
                 val pan = panAt(move.startFieldIdx)
-                val p = spin(spin, move.destFieldIdx)
+                val p = spinF(spin, move.destFieldIdx)
                 pan.fieldIdx = move.destFieldIdx
                 pan.moveTo(p)
             }
             is Move.Jump -> {
                 val pan = panAt(move.startFieldIdx)
-                val points = move.destFieldIdxList.map { spin(spin, it) }
+                val points = move.destFieldIdxList.map { spinF(spin, it) }
                 pan.fieldIdx = move.destFieldIdx
                 pan.moveTo(points)
             }
@@ -193,6 +251,8 @@ class StarhalmaBoardGui(
         val xFactor = 100.0
 
         lateinit var goButtonIcon: Bitmap
+        lateinit var clockwiseIcon: Bitmap
+        lateinit var antiClockwiseIcon: Bitmap
 
         val fieldCoordinates0: List<Point>
         init {
@@ -232,10 +292,13 @@ class StarhalmaBoardGui(
             Polar(Angle.between(it, midpoint), it.distanceTo(midpoint))
         }
 
-        val panColors = listOf(Colors.DARKRED, Colors.LIGHTSKYBLUE, Colors.DARKGREEN, Colors.VIOLET, Colors.DIMGREY, Colors.BLACK)
+        val playerColors = listOf(Colors.DARKRED, Colors.LIGHTSKYBLUE, Colors.DARKGREEN, Colors.VIOLET, Colors.DIMGREY, Colors.BLACK)
+        val playerNames = listOf("Red", "Blue", "Green", "Violet", "Grey", "Black")
 
         suspend fun initialize() {
             goButtonIcon = resourcesVfs["check_mark.png"].readBitmap()
+            clockwiseIcon = resourcesVfs["clockwise.png"].readBitmap()
+            antiClockwiseIcon = resourcesVfs["anti_clockwise.png"].readBitmap()
         }
     }
 }

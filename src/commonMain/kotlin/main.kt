@@ -1,13 +1,34 @@
 import com.soywiz.korge.Korge
+import com.soywiz.korge.scene.Module
+import com.soywiz.korge.scene.Scene
 import com.soywiz.korim.color.Colors
+import com.soywiz.korinject.AsyncInjector
+import com.soywiz.korma.geom.SizeInt
+import gui.GameScene
+import gui.MenuScene
 import gui.StarhalmaBoardGui
-import gui.starhalmaBoardGui
-import halma.PlayerAI
-import halma.PlayerHashedAI
-import halma.StarhalmaBoard
-import halma.makeGame
+import halma.Player
+import kotlin.reflect.KClass
 
+var playerClasses: List<(Int, List<Int>) -> Player<StarhalmaBoardGui>> = emptyList()
 
+suspend fun main() = Korge(Korge.Config(module = ConfigModule))
+
+object ConfigModule : Module() {
+    //override val size = SizeInt(2600, 2600)
+    override val size = SizeInt(512, 512)
+    //override val windowSize = SizeInt(512, 512)
+    override val bgcolor = Colors.BEIGE
+    override val clipBorders = false
+    override val mainScene : KClass<out Scene> = MenuScene::class
+
+    override suspend fun AsyncInjector.configure() {
+        mapPrototype { GameScene() }
+        mapPrototype { MenuScene() }
+    }
+}
+
+/*
 suspend fun main() = Korge(
     virtualWidth = 2600,
     virtualHeight = 2600,
@@ -55,3 +76,5 @@ suspend fun main() = Korge(
     game.start()
 }
 
+
+ */
