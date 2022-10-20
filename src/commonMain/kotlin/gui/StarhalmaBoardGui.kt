@@ -1,26 +1,19 @@
 package gui
 
-import com.soywiz.korge.input.onClick
-import com.soywiz.korge.tween.get
-import com.soywiz.korge.tween.tween
+import com.soywiz.korge.input.*
+import com.soywiz.korge.tween.*
 import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
-import com.soywiz.korim.bitmap.Bitmap
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.format.readBitmap
-import com.soywiz.korim.text.TextAlignment
-import com.soywiz.korim.vector.StrokeInfo
-import com.soywiz.korio.file.std.resourcesVfs
-import com.soywiz.korma.geom.Angle
-import com.soywiz.korma.geom.Point
-import com.soywiz.korma.geom.PointArrayList
-import com.soywiz.korma.geom.degrees
-import com.soywiz.korma.geom.vector.line
-import com.soywiz.korma.geom.vector.polygon
+import com.soywiz.korim.bitmap.*
+import com.soywiz.korim.color.*
+import com.soywiz.korim.format.*
+import com.soywiz.korim.text.*
+import com.soywiz.korio.file.std.*
+import com.soywiz.korma.geom.*
+import com.soywiz.korma.geom.vector.*
 import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
-import kotlin.math.sqrt
 
 
 fun Container.starhalmaBoardGui(
@@ -31,10 +24,10 @@ fun Container.starhalmaBoardGui(
 class StarhalmaBoardGui(
     numberOfPlayers: Int,
     private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers)
-): Container(), Board by starhalmaBoard, BoardGui {
-    init { scaleY = 0.82 }
+): FixedSizeContainer(STAR_HALMA_GUI_WIDTH, STAR_HALMA_BORD_GUI_HEIGHT), Board by starhalmaBoard, BoardGui {
+    init { scaleY = SCALE_Y }
 
-    val backg = sgraphics {
+    val backg = graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
             polygon(indices.map { i -> fieldCoordinates0[i] - Point(xFactor, yFactor) })
         }
@@ -54,7 +47,7 @@ class StarhalmaBoardGui(
             polygonOfCoordinateIndices(10, 14, 56)
         }
         // Lines
-        stroke(Colors.BLACK, StrokeInfo(thickness = 3.0)) {
+        stroke(Colors.BLACK, StrokeInfo(thickness = LINE_THICKNESS)) {
             for (i in 0 until StarhalmaStaticBoardMappings.fieldsSize) {
                 for (n in StarhalmaStaticBoardMappings.fieldNeighbors[i]) {
                     if (n > i) {
@@ -65,9 +58,11 @@ class StarhalmaBoardGui(
                 }
             }
         }
+        }) {
         xy(midpoint)
         anchor(0.5, 0.5)
     }
+
 
     class StarhalmaFieldGui(idx: Int): FieldGui(idx) {
         override var x
@@ -87,25 +82,25 @@ class StarhalmaBoardGui(
             color = Colors.BLACK
             anchor(0.5, 0.5)
             xy(fieldCoordinates0[idx])
-            val innerCircle =
-                if (idx !in extendedHome.flatten())
-                    circle {
-                        radius = FIELD_RADIUS - LINE_THICKNESS
-                        color = Colors.YELLOW
-                        anchor(0.5, 0.5)
-                        xy(fieldCoordinates0[idx])
-                    }
-                else null
+            if (idx !in extendedHome.flatten()) {
+                this@StarhalmaFieldGui.circle {
+                    radius = FIELD_RADIUS - 2 * LINE_THICKNESS
+                    color = Colors.YELLOW
+                    anchor(0.5, 0.5)
+                    xy(fieldCoordinates0[idx])
+                }
+            }
         }
 
         private val mark = circle {
             radius = MARK_RADIUS
             stroke = Colors.GREEN
-            strokeThickness = 20.0
+            strokeThickness = MARK_LINE_THICKNESS
             alpha = 0.5
             visible = false
             anchor(.5, .5)
-            xy(fieldCoordinates0[idx])
+            val xyOffset = Point(strokeThickness, strokeThickness) / 2
+            xy(fieldCoordinates0[idx] + xyOffset)
         }
 
         override fun mark() { mark.visible = true }
@@ -129,66 +124,68 @@ class StarhalmaBoardGui(
         pans = panList
     }
 
-    override val goButton = uiButton {
+    override val goButton = uiButton("") {
         enabled = false
         visible = false
-        scaledHeight = 230.0
-        scaledWidth = 230.0
-        alignBottomToBottomOf(this@StarhalmaBoardGui, 150)
-        alignRightToRightOf(this@StarhalmaBoardGui, 250)
+        scaledHeight = BUTTON_SIZE
+        scaledWidth = BUTTON_SIZE
+        y = (STAR_HALMA_BORD_GUI_HEIGHT - height - GO_BUTTON_Y_PADDING) / SCALE_Y
+        //alignBottomToBottomOf(this@StarhalmaBoardGui, GO_BUTTON_Y_PADDING)
+        alignRightToRightOf(this@StarhalmaBoardGui, GO_BUTTON_X_PADDING)
 
         image(goButtonIcon) {
-            scaledHeight = 200.0
-            scaledWidth = 200.0
+            scaledHeight = BUTTON_IMAGE_SIZE
+            scaledWidth = BUTTON_IMAGE_SIZE
         }.centerOn(this)
     }
 
-    private val spinClockwiseButton = uiButton {
-        scaledHeight = 230.0
-        scaledWidth = 230.0
-        alignTopToTopOf(this@StarhalmaBoardGui, 50)
-        alignLeftToLeftOf(this@StarhalmaBoardGui, 50)
+    private val spinClockwiseButton = uiButton("") {
+        scaledHeight = BUTTON_SIZE
+        scaledWidth = BUTTON_SIZE
+        alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignLeftToLeftOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         onClick { tween(::spin[(spin.degrees + 60).degrees]) }
 
         image(clockwiseIcon) {
-            scaledHeight = 200.0
-            scaledWidth = 200.0
+            scaledHeight = BUTTON_IMAGE_SIZE
+            scaledWidth = BUTTON_IMAGE_SIZE
         }.centerOn(this)
     }
 
-    private val spinAntiClockwiseButton = uiButton {
-        scaledHeight = 230.0
-        scaledWidth = 230.0
+    private val spinAntiClockwiseButton = uiButton("") {
+        scaledHeight = BUTTON_SIZE
+        scaledWidth = BUTTON_SIZE
         alignTopToTopOf(spinClockwiseButton)
-        alignLeftToRightOf(spinClockwiseButton, 50)
+        alignLeftToRightOf(spinClockwiseButton, BUTTON_PADDING)
         onClick { tween(::spin[(spin.degrees - 60).degrees]) }
 
         image(antiClockwiseIcon) {
-            scaledHeight = 200.0
-            scaledWidth = 200.0
+            scaledHeight = BUTTON_IMAGE_SIZE
+            scaledWidth = BUTTON_IMAGE_SIZE
         }.centerOn(this)
     }
 
     val roundText = uiText("Game starts") {
-        textSize = 80.0
+        textSize = ROUND_TEXT_SIZE
         textColor = Colors.BLACK
         textAlignment = TextAlignment.RIGHT
-        alignTopToTopOf(this@StarhalmaBoardGui, 50)
-        alignRightToRightOf(this@StarhalmaBoardGui, 50)
+        alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignRightToRightOf(this@StarhalmaBoardGui, BUTTON_PADDING)
     }
 
-    private val msgBox = roundRect(900, 500, 20, 20) {
+    private val msgBox = roundRect(MSG_BOX_WIDTH, MSG_BOX_HEIGHT, MSG_BOX_RX, MSG_BOX_RX) {
         stroke = Colors.BLACK
-        strokeThickness = 20.0
-        alignBottomToBottomOf(this@StarhalmaBoardGui, 50)
-        alignLeftToLeftOf(this@StarhalmaBoardGui, 50)
+        strokeThickness = MSG_BOX_LINE_THICKNESS
+        y = (STAR_HALMA_BORD_GUI_HEIGHT - height) / SCALE_Y
+        //alignBottomToBottomOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignLeftToLeftOf(this@StarhalmaBoardGui, BUTTON_PADDING)
     }
 
     private val msgText = uiText("") {
-        textSize = 96.0
+        textSize = MSG_TEXT_SIZE
         textColor = Colors.BLACK
-        alignLeftToLeftOf(msgBox, 75)
-        alignTopToTopOf(msgBox, 75)
+        alignLeftToLeftOf(msgBox, MSG_TEXT_PADDING)
+        alignTopToTopOf(msgBox, MSG_TEXT_PADDING)
     }
 
     override fun hookBeforeMove(player: Player<out Board>) {
@@ -244,11 +241,27 @@ class StarhalmaBoardGui(
     }
 
     companion object {
-        const val FIELD_RADIUS = 35.0
-        const val MARK_RADIUS = 60.0
-        const val LINE_THICKNESS = 5.0
-        val yFactor = sqrt(3.0) * 100.0
-        val xFactor = 100.0
+        private const val STAR_HALMA_GUI_WIDTH = 512.0 //2600.0
+        private const val STAR_HALMA_BORD_GUI_HEIGHT = 512.0 //2600.0
+        private const val SCALE_Y = 0.82
+        private const val FIELD_RADIUS = 7.0 //35.0
+        private const val MARK_RADIUS = 12.0 //60.0
+        private const val LINE_THICKNESS = 0.6 //3.0
+        private const val MARK_LINE_THICKNESS = 7.0 * LINE_THICKNESS
+        private const val BUTTON_SIZE = 46.0 //230.0
+        private const val BUTTON_IMAGE_SIZE = .9 * BUTTON_SIZE
+        private const val ROUND_TEXT_SIZE = 16.0 //80.0
+        private const val MSG_TEXT_SIZE = 20.0 //96.0
+        private const val MSG_BOX_LINE_THICKNESS = 6.0 * LINE_THICKNESS
+        private const val BUTTON_PADDING = 17.0 //50.0
+        private const val MSG_TEXT_PADDING = 15.0 //75.0
+        private const val MSG_BOX_WIDTH = 180 //900
+        private const val MSG_BOX_HEIGHT = 100 //500
+        private const val MSG_BOX_RX = 4 //20
+        private const val GO_BUTTON_X_PADDING = 50 //250
+        private const val GO_BUTTON_Y_PADDING = 30 //150
+        private const val xFactor = 20.0 //100.0
+        private const val yFactor = 1.7320508076 * xFactor //sqrt(3.0) * xFactor
 
         lateinit var goButtonIcon: Bitmap
         lateinit var clockwiseIcon: Bitmap

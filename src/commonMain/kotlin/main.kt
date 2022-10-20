@@ -4,23 +4,21 @@ import com.soywiz.korge.scene.Scene
 import com.soywiz.korim.color.Colors
 import com.soywiz.korinject.AsyncInjector
 import com.soywiz.korma.geom.SizeInt
-import gui.GameScene
-import gui.MenuScene
-import gui.StarhalmaBoardGui
-import halma.Player
+import gui.*
+import halma.*
 import kotlin.reflect.KClass
 
 var playerClasses: List<(Int, List<Int>) -> Player<StarhalmaBoardGui>> = emptyList()
+//var playerClasses: List<(Int, List<Int>) -> Player<StarhalmaBoardGui>> = listOf(::PlayerAI, ::PlayerGui)
 
 suspend fun main() = Korge(Korge.Config(module = ConfigModule))
 
 object ConfigModule : Module() {
-    //override val size = SizeInt(2600, 2600)
     override val size = SizeInt(512, 512)
-    //override val windowSize = SizeInt(512, 512)
     override val bgcolor = Colors.BEIGE
     override val clipBorders = false
     override val mainScene : KClass<out Scene> = MenuScene::class
+    //override val mainScene : KClass<out Scene> = GameScene::class
 
     override suspend fun AsyncInjector.configure() {
         mapPrototype { GameScene() }

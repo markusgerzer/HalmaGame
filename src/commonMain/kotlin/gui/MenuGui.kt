@@ -64,7 +64,7 @@ class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>)
         }
     }
 
-    val startButton = uiButton(text = "S T A R T") {
+    val startButton = uiButton("S T A R T") {
         centerXOn(this@MenuGui)
         alignTopToBottomOf(playerTypes.last(), 20)
         onClick { startGame() }

@@ -1,10 +1,11 @@
-/.idea
-/.gradle
+.gradle
+gradle-app.setting
+build/
+
+.idea/
+*.ipr
+*.iws
 *.iml
-# Project exclude paths
-/build/
-/build/classes/kotlin/js/main/
-/build/classes/kotlin/jvm/main/
-/build/classes/kotlin/jvm/test/
-/gradle/
-/kotlin-js-store/
+out/
+
+.DS_Store
