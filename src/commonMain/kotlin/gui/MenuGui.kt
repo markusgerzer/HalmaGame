@@ -1,13 +1,10 @@
 package gui
 
-import com.soywiz.korge.input.onClick
+import com.soywiz.korge.input.*
 import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
-import com.soywiz.korim.color.Colors
-import halma.Player
-import halma.PlayerAI
-import halma.PlayerHashedAI
-import halma.PlayerStupidAI
+import com.soywiz.korim.color.*
+import halma.*
 
 
 fun Container.menuGui(onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit) =
@@ -41,7 +38,7 @@ class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>)
     init {
         playerTypes.forEach { it.alignLeftToLeftOf(playerTypeLabel) }
         playerTypes[0].alignTopToBottomOf(playerTypeLabel, 20)
-        playerTypes.zipWithNext { a: UIComboBox<String>, b: UIComboBox<String> ->
+        playerTypes.zipWithNext { a, b ->
             b.alignTopToBottomOf(a, 10)
         }
     }
