@@ -20,16 +20,6 @@ class GameScene : Scene() {
         ) { }
 
         game.start()
-        /*
-        fixedSizeContainer(512, 512) {
-            //scale = .2
-            val game = makeGame(
-                ::starhalmaBoardGui,
-                ::StarhalmaBoard,
-                playerClasses
-            ) { }
-
-            game.start()
-        }*/
+        sceneContainer.back()
     }
 }

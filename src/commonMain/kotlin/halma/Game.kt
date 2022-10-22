@@ -6,18 +6,24 @@ class Game<T: Board>(
     val block: suspend Game<T>.()->Unit = { }
 ) {
     var round = 1
+        private set
 
     suspend fun start() {
-        while (true) {
+        val winner: Player<T>
+        round@while (true) {
             for (player in players) {
                 board.hookBeforeMove(player)
                 val move = player.makeMove()
                 board.move(move)
                 block()
-                if (player.hasWon()) return
+                if (player.hasWon()) {
+                    winner = player
+                    break@round
+                }
             }
             round++
         }
+        board.hookGameEnd(winner)
     }
 }
 

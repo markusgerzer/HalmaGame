@@ -55,11 +55,11 @@ class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>)
     }
 
     init {
-        for (id in 0 until 6) {
-            uiText("${id + 1}") {
+        for (i in 0 until 6) {
+            uiText("${i + 1}") {
                 textColor = Colors.BLACK
                 alignLeftToLeftOf(playerNrLabel)
-                alignTopToTopOf(playerTypes[id])
+                alignTopToTopOf(playerTypes[i])
             }
         }
     }

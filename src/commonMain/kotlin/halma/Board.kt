@@ -25,6 +25,7 @@ interface Board : StaticBoardMappings {
     }
 
     fun hookBeforeMove(player: Player<out Board>) {}
+    suspend fun hookGameEnd(winner: Player<out Board>) { println(winner) }
 }
 
 interface StaticBoardMappings {

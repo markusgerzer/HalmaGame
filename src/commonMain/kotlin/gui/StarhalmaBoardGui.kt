@@ -8,12 +8,14 @@ import com.soywiz.korim.bitmap.*
 import com.soywiz.korim.color.*
 import com.soywiz.korim.format.*
 import com.soywiz.korim.text.*
+import com.soywiz.korio.async.*
 import com.soywiz.korio.file.std.*
 import com.soywiz.korma.geom.*
 import com.soywiz.korma.geom.vector.*
 import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
+import kotlin.native.concurrent.*
 
 
 fun Container.starhalmaBoardGui(
@@ -193,10 +195,27 @@ class StarhalmaBoardGui(
 
         val playerName = playerNames[player.id - 1]
         msgText.text = when (player) {
-            is PlayerAI -> "$playerName player\n[Computer] makes\nhis move.\n"
+            is PlayerAI, is PlayerStupidAI -> "$playerName player\n[Computer] makes\nhis move.\n"
             is PlayerGui -> "$playerName player\nplease make\nyour move.\n"
             else -> "???"
         }
+    }
+
+    override suspend fun hookGameEnd(winner: Player<out Board>) {
+        val playerName = playerNames[winner.id - 1]
+        val playerType = when (winner) {
+            is PlayerAI, is PlayerStupidAI -> "[Computer]"
+            is PlayerGui -> ""
+            else -> "???"
+        }
+        msgText.text = "$playerName $playerType\nhas won.\nBack to Menu\n"
+        val goButtonClicked = Signal<Unit>()
+        goButton.onClick {
+            goButtonClicked.invoke()
+        }
+        goButton.visible = true
+        goButton.enabled = true
+        goButtonClicked.waitOne()
     }
 
     private fun spinF(angle: Angle, fieldIdx: Int): Point {
@@ -240,6 +259,7 @@ class StarhalmaBoardGui(
         throw IllegalStateException("No pan at idx $fieldIdx!")
     }
 
+    @ThreadLocal
     companion object {
         private const val STAR_HALMA_GUI_WIDTH = 512.0 //2600.0
         private const val STAR_HALMA_BORD_GUI_HEIGHT = 512.0 //2600.0
@@ -263,11 +283,11 @@ class StarhalmaBoardGui(
         private const val xFactor = 20.0 //100.0
         private const val yFactor = 1.7320508076 * xFactor //sqrt(3.0) * xFactor
 
-        lateinit var goButtonIcon: Bitmap
-        lateinit var clockwiseIcon: Bitmap
-        lateinit var antiClockwiseIcon: Bitmap
+        private lateinit var goButtonIcon: Bitmap
+        private lateinit var clockwiseIcon: Bitmap
+        private lateinit var antiClockwiseIcon: Bitmap
 
-        val fieldCoordinates0: List<Point>
+        private val fieldCoordinates0: List<Point>
         init {
             val coordinates = PointArrayList(fieldsSize)
             var y = 1
@@ -298,10 +318,10 @@ class StarhalmaBoardGui(
             fieldCoordinates0 = coordinates.toList()
         }
 
-        val midpoint = fieldCoordinates0[60]
+        private val midpoint = fieldCoordinates0[60]
         
-        data class Polar(val angle: Angle, val r: Double)
-        val fieldPolar = fieldCoordinates0.map {
+        private data class Polar(val angle: Angle, val r: Double)
+        private val fieldPolar = fieldCoordinates0.map {
             Polar(Angle.between(it, midpoint), it.distanceTo(midpoint))
         }
 
