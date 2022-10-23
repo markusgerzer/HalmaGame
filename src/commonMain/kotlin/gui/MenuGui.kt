@@ -5,13 +5,13 @@ import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
 import halma.*
+import ui.*
 
 
 fun Container.menuGui(onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit) =
     MenuGui(onStart).addTo(this)
 
 class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit): Container() {
-    private var menuDropDown = false
 
     private val playerNrLabel = uiText("Nr.") {
         textColor = Colors.BLACK
@@ -30,16 +30,30 @@ class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>)
         alignTopToTopOf(playerColorLabel)
         alignLeftToLeftOf(playerColorLabel, 150)
     }
-    
-    
+
     private val playerTypes = List(6) {
-        uiComboBox(200.0, items = supportedTypes.keys.toList())
+        uiComboBox(200.0, items = supportedTypes.keys.toList()) {
+            deactivate()
+        }
     }
     init {
         playerTypes.forEach { it.alignLeftToLeftOf(playerTypeLabel) }
         playerTypes[0].alignTopToBottomOf(playerTypeLabel, 20)
         playerTypes.zipWithNext { a, b ->
             b.alignTopToBottomOf(a, 10)
+        }
+
+        playerTypes[0].activate()
+        for (i in 0 until playerTypes.size - 1) {
+            playerTypes[i].onSelectionUpdate {
+                if (it.selectedIndex > 0) playerTypes[i + 1].activate()
+                else {
+                    for (j in i + 1 until playerTypes.size) {
+                        playerTypes[j].deactivate()
+                        playerTypes[j].selectedIndex = 0
+                    }
+                }
+            }
         }
     }
 
