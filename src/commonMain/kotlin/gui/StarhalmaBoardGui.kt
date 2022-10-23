@@ -18,14 +18,19 @@ import halma.StarhalmaStaticBoardMappings.fieldsSize
 import kotlin.native.concurrent.*
 
 
-fun Container.starhalmaBoardGui(
+suspend fun Container.starhalmaBoardGui(
     numberOfPlayers: Int,
-    starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers)
-) = StarhalmaBoardGui(numberOfPlayers, starhalmaBoard).addTo(this)
+    starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers),
+    playerColors: List<RGBA> = StarhalmaBoardGui.defaultPlayerColors,
+    playerNames: List<String> = StarhalmaBoardGui.defaultPlayerNames
+): StarhalmaBoardGui = StarhalmaBoardGui(numberOfPlayers, starhalmaBoard, playerColors, playerNames).addTo(this)
 
-class StarhalmaBoardGui(
+
+class StarhalmaBoardGui private constructor(
     numberOfPlayers: Int,
-    private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers)
+    private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers),
+    val playerColors: List<RGBA> = defaultPlayerColors,
+    val playerNames: List<String> = defaultPlayerNames
 ): FixedSizeContainer(STAR_HALMA_GUI_WIDTH, STAR_HALMA_BORD_GUI_HEIGHT), Board by starhalmaBoard, BoardGui {
     init { scaleY = SCALE_Y }
 
@@ -319,19 +324,32 @@ class StarhalmaBoardGui(
         }
 
         private val midpoint = fieldCoordinates0[60]
-        
+
         private data class Polar(val angle: Angle, val r: Double)
         private val fieldPolar = fieldCoordinates0.map {
             Polar(Angle.between(it, midpoint), it.distanceTo(midpoint))
         }
 
-        val playerColors = listOf(Colors.DARKRED, Colors.LIGHTSKYBLUE, Colors.DARKGREEN, Colors.VIOLET, Colors.DIMGREY, Colors.BLACK)
-        val playerNames = listOf("Red", "Blue", "Green", "Violet", "Grey", "Black")
+        val defaultPlayerColors = listOf(
+            Colors.DARKRED, Colors.LIGHTSKYBLUE, Colors.DARKGREEN,
+            Colors.VIOLET, Colors.DIMGREY, Colors.BLACK
+        )
+        val defaultPlayerNames = listOf("Red", "Blue", "Green", "Violet", "Grey", "Black")
 
-        suspend fun initialize() {
-            goButtonIcon = resourcesVfs["check_mark.png"].readBitmap()
-            clockwiseIcon = resourcesVfs["clockwise.png"].readBitmap()
-            antiClockwiseIcon = resourcesVfs["anti_clockwise.png"].readBitmap()
+        private var isInitialized = false
+        suspend operator fun invoke (
+            numberOfPlayers: Int,
+            starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers),
+            playerColors: List<RGBA> = defaultPlayerColors,
+            playerNames: List<String> = defaultPlayerNames
+        ): StarhalmaBoardGui {
+            if (!isInitialized) {
+                goButtonIcon = resourcesVfs["check_mark.png"].readBitmap()
+                clockwiseIcon = resourcesVfs["clockwise.png"].readBitmap()
+                antiClockwiseIcon = resourcesVfs["anti_clockwise.png"].readBitmap()
+                isInitialized = true
+            }
+            return StarhalmaBoardGui(numberOfPlayers, starhalmaBoard, playerColors, playerNames)
         }
     }
 }

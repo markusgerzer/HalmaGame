@@ -11,8 +11,6 @@ class GameScene : Scene() {
     }
 
     override suspend fun SContainer.sceneMain() {
-        StarhalmaBoardGui.initialize()
-
         val game = makeGame(
             ::starhalmaBoardGui,
             ::StarhalmaBoard,

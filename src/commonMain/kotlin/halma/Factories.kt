@@ -29,8 +29,8 @@ fun <B: Board>makeGame(
     }
 }
 
-fun <D: BoardGui, B: Board>makeGame(
-    decorator: (Int, B) -> D,
+suspend fun <D: BoardGui, B: Board>makeGame(
+    decorator: suspend (Int, B) -> D,
     boardClass: (Int) -> B,
     playerClasses: List<(Int, List<Int>) -> Player<D>>,
     block: suspend Game<D>.()->Unit = { }
