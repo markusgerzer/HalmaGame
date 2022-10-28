@@ -72,7 +72,6 @@ class StarhalmaBoardGui private constructor(
         anchor(0.5, 0.5)
     }
 
-
     class StarhalmaFieldGui(idx: Int): FieldGui(idx) {
         override var x
             get() = station.x
