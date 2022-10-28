@@ -8,10 +8,10 @@ import halma.*
 import ui.*
 
 
-fun Container.menuGui(onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit) =
+fun Container.menuGui(onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit) =
     MenuGui(onStart).addTo(this)
 
-class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit): Container() {
+class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit): Container() {
 
     private val playerNrLabel = uiText("Nr.") {
         textColor = Colors.BLACK
@@ -85,7 +85,7 @@ class MenuGui(val onStart: (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>)
         centerOnStage()
     }
 
-    private fun startGame() {
+    private suspend fun startGame() {
         val playerTypeName = playerTypes.map { it.selectedItem }
         val player = playerTypeName.mapNotNull { supportedTypes[it] }
         onStart(player)

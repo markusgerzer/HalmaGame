@@ -16,6 +16,7 @@ import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
 import kotlin.native.concurrent.*
+import ui.*
 
 
 suspend fun Container.starhalmaBoardGui(
@@ -31,7 +32,8 @@ class StarhalmaBoardGui private constructor(
     private val starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers),
     val playerColors: List<RGBA> = defaultPlayerColors,
     val playerNames: List<String> = defaultPlayerNames
-): FixedSizeContainer(STAR_HALMA_GUI_WIDTH, STAR_HALMA_BORD_GUI_HEIGHT), Board by starhalmaBoard, BoardGui {
+): FixedSizeContainer(STAR_HALMA_BOARD_GUI_WIDTH, STAR_HALMA_BOARD_GUI_HEIGHT), Board by starhalmaBoard, BoardGui {
+
     init { scaleY = SCALE_Y }
 
     val backg = graphics( {
@@ -136,7 +138,7 @@ class StarhalmaBoardGui private constructor(
         visible = false
         scaledHeight = BUTTON_SIZE
         scaledWidth = BUTTON_SIZE
-        y = (STAR_HALMA_BORD_GUI_HEIGHT - height - GO_BUTTON_Y_PADDING) / SCALE_Y
+        y = (STAR_HALMA_BOARD_GUI_HEIGHT - height - GO_BUTTON_Y_PADDING) / SCALE_Y
         //alignBottomToBottomOf(this@StarhalmaBoardGui, GO_BUTTON_Y_PADDING)
         alignRightToRightOf(this@StarhalmaBoardGui, GO_BUTTON_X_PADDING)
 
@@ -172,18 +174,41 @@ class StarhalmaBoardGui private constructor(
         }.centerOn(this)
     }
 
+    private val cancelButton = uiButton("X") {
+        scaledWidth = ROUND_TEXT_SIZE
+        scaledHeight = ROUND_TEXT_SIZE
+        alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignRightToRightOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        onClick {
+            val buttons = listOf(this, goButton, spinClockwiseButton, spinAntiClockwiseButton)
+            buttons.forEach { it.disable() }
+            val speed = this@StarhalmaBoardGui.speed
+            this@StarhalmaBoardGui.speed = 0.0
+            stage?.confirmBox("Exit Game?", 300.0, 100.0, 20.0, 20.0) {
+                onConfirm { exit() }
+                onNoConfirm {
+                    this@StarhalmaBoardGui.speed = speed
+                    buttons.forEach { it.enable() }
+                }
+            }
+        }
+    }
+    private val _onExitCallbacks = mutableListOf<suspend () -> Unit>()
+    fun  onExit(callback: (suspend () -> Unit)) = _onExitCallbacks.add(callback)
+    private suspend fun exit() { for (callback in _onExitCallbacks) callback() }
+
     val roundText = uiText("Game starts") {
         textSize = ROUND_TEXT_SIZE
         textColor = Colors.BLACK
         textAlignment = TextAlignment.RIGHT
         alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
-        alignRightToRightOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignRightToLeftOf(cancelButton, BUTTON_PADDING)
     }
 
     private val msgBox = roundRect(MSG_BOX_WIDTH, MSG_BOX_HEIGHT, MSG_BOX_RX, MSG_BOX_RX) {
         stroke = Colors.BLACK
         strokeThickness = MSG_BOX_LINE_THICKNESS
-        y = (STAR_HALMA_BORD_GUI_HEIGHT - height) / SCALE_Y
+        y = (STAR_HALMA_BOARD_GUI_HEIGHT - height) / SCALE_Y
         //alignBottomToBottomOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         alignLeftToLeftOf(this@StarhalmaBoardGui, BUTTON_PADDING)
     }
@@ -266,8 +291,8 @@ class StarhalmaBoardGui private constructor(
 
     @ThreadLocal
     companion object {
-        private const val STAR_HALMA_GUI_WIDTH = 512.0 //2600.0
-        private const val STAR_HALMA_BORD_GUI_HEIGHT = 512.0 //2600.0
+        private const val STAR_HALMA_BOARD_GUI_WIDTH = 512.0 //2600.0
+        private const val STAR_HALMA_BOARD_GUI_HEIGHT = 512.0 //2600.0
         private const val SCALE_Y = 0.82
         private const val FIELD_RADIUS = 7.0 //35.0
         private const val MARK_RADIUS = 12.0 //60.0

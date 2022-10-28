@@ -1,9 +1,8 @@
 package gui
 
-import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
-import halma.StarhalmaBoard
-import halma.makeGame
+import halma.*
 import playerClasses
 
 class GameScene : Scene() {
@@ -15,8 +14,9 @@ class GameScene : Scene() {
             ::starhalmaBoardGui,
             ::StarhalmaBoard,
             playerClasses
-        ) { }
+        ) {}
 
+        game.board.onExit { sceneContainer.back() }
         game.start()
         sceneContainer.back()
     }
