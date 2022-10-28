@@ -15,6 +15,7 @@ import com.soywiz.korma.geom.vector.*
 import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
+import misc.*
 import kotlin.native.concurrent.*
 import ui.*
 
@@ -184,7 +185,7 @@ class StarhalmaBoardGui private constructor(
             val speed = this@StarhalmaBoardGui.speed
             this@StarhalmaBoardGui.speed = 0.0
             stage?.confirmBox("Exit Game?", 300.0, 100.0, 20.0, 20.0) {
-                onConfirm { exit() }
+                onConfirm { _exit() }
                 onNoConfirm {
                     this@StarhalmaBoardGui.speed = speed
                     buttons.forEach { it.enable() }
@@ -192,9 +193,8 @@ class StarhalmaBoardGui private constructor(
             }
         }
     }
-    private val _onExitCallbacks = mutableListOf<suspend () -> Unit>()
-    fun  onExit(callback: (suspend () -> Unit)) = _onExitCallbacks.add(callback)
-    private suspend fun exit() { for (callback in _onExitCallbacks) callback() }
+    private val _exit = SimpleEventSuspend()
+    fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
 
     val roundText = uiText("Game starts") {
         textSize = ROUND_TEXT_SIZE
