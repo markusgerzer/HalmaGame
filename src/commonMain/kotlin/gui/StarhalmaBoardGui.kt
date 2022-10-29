@@ -37,6 +37,10 @@ class StarhalmaBoardGui private constructor(
 
     init { scaleY = SCALE_Y }
 
+    private val _exit = SimpleEventSuspend()
+    fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
+
+
     val backg = graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
             polygon(indices.map { i -> fieldCoordinates0[i] - Point(xFactor, yFactor) })
@@ -133,6 +137,30 @@ class StarhalmaBoardGui private constructor(
         pans = panList
     }
 
+    private val boardElements = listOf(backg) + guiFields + pans
+    private val paused get() = backg.speed <= 0.0
+
+    private fun pause() { boardElements.forEach { it.speed = 0.0 } }
+    private fun endPause() { boardElements.forEach { it.speed = 1.0 } }
+    private fun togglePause() { if (paused) endPause() else pause() }
+
+    var spin = 0.degrees
+        set(value) {
+            backg.rotation = value
+            guiFields.forEach { it.spinF(value) }
+            pans.forEach { it.spinF(value) }
+            field = value
+        }
+
+    private fun spinF(angle: Angle, fieldIdx: Int): Point {
+        val (angle0, r) = fieldPolar[fieldIdx]
+        val angle1 = Angle.fromDegrees(angle0.degrees + angle.degrees - 180.0)
+        return Point.fromPolar(midpoint, angle1, r)
+    }
+    private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
+    private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
+
+
     override val goButton = uiButton("") {
         enabled = false
         visible = false
@@ -192,8 +220,6 @@ class StarhalmaBoardGui private constructor(
             }
         }
     }
-    private val _exit = SimpleEventSuspend()
-    fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
 
     private val _pauseButton = uiButton("||") {
         scaledWidth = ROUND_TEXT_SIZE
@@ -202,6 +228,18 @@ class StarhalmaBoardGui private constructor(
         alignRightToLeftOf(cancelButton, BUTTON_PADDING)
         onClick { togglePause() }
     }
+
+    private val buttons = listOf(
+        _pauseButton,
+        cancelButton,
+        goButton,
+        spinClockwiseButton,
+        spinAntiClockwiseButton
+    )
+
+    private fun disableButtons() { buttons.forEach { it.disable() } }
+    private fun enableButtons() { buttons.forEach { it.enable() } }
+
 
     val roundText = uiText("Game starts") {
         textSize = ROUND_TEXT_SIZE
@@ -225,24 +263,6 @@ class StarhalmaBoardGui private constructor(
         alignLeftToLeftOf(msgBox, MSG_TEXT_PADDING)
         alignTopToTopOf(msgBox, MSG_TEXT_PADDING)
     }
-
-    private val buttons = listOf(
-        _pauseButton,
-        cancelButton,
-        goButton,
-        spinClockwiseButton,
-        spinAntiClockwiseButton
-    )
-
-    private val boardElements = listOf(backg) + guiFields + pans
-    private val paused get() = backg.speed <= 0.0
-
-    private fun disableButtons() { buttons.forEach { it.disable() } }
-    private fun enableButtons() { buttons.forEach { it.enable() } }
-
-    private fun pause() { boardElements.forEach { it.speed = 0.0 } }
-    private fun endPause() { boardElements.forEach { it.speed = 1.0 } }
-    private fun togglePause() { if (paused) endPause() else pause() }
 
 
     override fun hookBeforeMove(player: Player<out Board>) {
@@ -272,22 +292,6 @@ class StarhalmaBoardGui private constructor(
         goButton.enabled = true
         goButtonClicked.waitOne()
     }
-
-    private fun spinF(angle: Angle, fieldIdx: Int): Point {
-        val (angle0, r) = fieldPolar[fieldIdx]
-        val angle1 = Angle.fromDegrees(angle0.degrees + angle.degrees - 180.0)
-        return Point.fromPolar(midpoint, angle1, r)
-    }
-    private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
-    private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
-
-    var spin = 0.degrees
-        set(value) {
-            backg.rotation = value
-            guiFields.forEach { it.spinF(value) }
-            pans.forEach { it.spinF(value) }
-            field = value
-        }
 
     override suspend fun move(move: Move) {
         starhalmaBoard.move(move)
