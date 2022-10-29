@@ -32,7 +32,10 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
     }
 
     private val playerTypes = List(6) {
-        uiComboBox(200.0, items = supportedTypes.keys.toList()) {
+        val items = supportedTypes
+            .keys.toList()
+            .run { if (it == 0) drop(1) else this }
+        uiComboBox(200.0, items = items) {
             deactivate()
         }
     }
@@ -44,7 +47,8 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
         }
 
         playerTypes[0].activate()
-        for (i in 0 until playerTypes.size - 1) {
+        playerTypes[1].activate()
+        for (i in 1 until playerTypes.size - 1) {
             playerTypes[i].onSelectionUpdate {
                 if (it.selectedIndex > 0) playerTypes[i + 1].activate()
                 else {

@@ -180,15 +180,14 @@ class StarhalmaBoardGui private constructor(
         alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         alignRightToRightOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         onClick {
-            val buttons = listOf(this, goButton, spinClockwiseButton, spinAntiClockwiseButton)
-            buttons.forEach { it.disable() }
-            val speed = this@StarhalmaBoardGui.speed
-            this@StarhalmaBoardGui.speed = 0.0
+            val gameWasPaused = paused
+            disableButtons()
+            pause()
             stage?.confirmBox("Exit Game?", 300.0, 100.0, 20.0, 20.0) {
                 onConfirm { _exit() }
                 onNoConfirm {
-                    this@StarhalmaBoardGui.speed = speed
-                    buttons.forEach { it.enable() }
+                    if (!gameWasPaused) endPause()
+                    enableButtons()
                 }
             }
         }
@@ -196,12 +195,20 @@ class StarhalmaBoardGui private constructor(
     private val _exit = SimpleEventSuspend()
     fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
 
+    private val _pauseButton = uiButton("||") {
+        scaledWidth = ROUND_TEXT_SIZE
+        scaledHeight = ROUND_TEXT_SIZE
+        alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
+        alignRightToLeftOf(cancelButton, BUTTON_PADDING)
+        onClick { togglePause() }
+    }
+
     val roundText = uiText("Game starts") {
         textSize = ROUND_TEXT_SIZE
         textColor = Colors.BLACK
         textAlignment = TextAlignment.RIGHT
         alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
-        alignRightToLeftOf(cancelButton, BUTTON_PADDING)
+        alignRightToLeftOf(_pauseButton, BUTTON_PADDING)
     }
 
     private val msgBox = roundRect(MSG_BOX_WIDTH, MSG_BOX_HEIGHT, MSG_BOX_RX, MSG_BOX_RX) {
@@ -218,6 +225,25 @@ class StarhalmaBoardGui private constructor(
         alignLeftToLeftOf(msgBox, MSG_TEXT_PADDING)
         alignTopToTopOf(msgBox, MSG_TEXT_PADDING)
     }
+
+    private val buttons = listOf(
+        _pauseButton,
+        cancelButton,
+        goButton,
+        spinClockwiseButton,
+        spinAntiClockwiseButton
+    )
+
+    private val boardElements = listOf(backg) + guiFields + pans
+    private val paused get() = backg.speed <= 0.0
+
+    private fun disableButtons() { buttons.forEach { it.disable() } }
+    private fun enableButtons() { buttons.forEach { it.enable() } }
+
+    private fun pause() { boardElements.forEach { it.speed = 0.0 } }
+    private fun endPause() { boardElements.forEach { it.speed = 1.0 } }
+    private fun togglePause() { if (paused) endPause() else pause() }
+
 
     override fun hookBeforeMove(player: Player<out Board>) {
         roundText.text = "Round ${player.game.round}"
