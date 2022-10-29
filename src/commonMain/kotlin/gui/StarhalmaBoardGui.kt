@@ -140,8 +140,22 @@ class StarhalmaBoardGui private constructor(
     private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
 
-    private fun pause() { boardElements.forEach { it.speed = 0.0 } }
-    private fun endPause() { boardElements.forEach { it.speed = 1.0 } }
+    private val pauseText = uiText("P A U S E D") {
+        visible = false
+        textColor = Colors.BLACK.withAd(.5)
+        textSize = MSG_TEXT_SIZE * 3
+        textAlignment = TextAlignment.MIDDLE_CENTER
+        xy(midpoint - Point(windowBounds.width / 2, windowBounds.height / 2))
+    }
+
+    private fun pause() {
+        boardElements.forEach { it.speed = 0.0 }
+        pauseText.visible = true
+    }
+    private fun endPause() {
+        pauseText.visible = false
+        boardElements.forEach { it.speed = 1.0 }
+    }
     private fun togglePause() { if (paused) endPause() else pause() }
 
     var spin = 0.degrees
