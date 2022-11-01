@@ -57,6 +57,8 @@ class Pan(color: RGBA): Container() {
         tween(::rotation[0.degrees], time = HALF_MOVE_TIME)
     }
 
+    private val x1 get() = x
+    private val y1 get() = y
     suspend fun moveTo(points: List<Point>) {
         parent?.let {
             removeFromParent()
@@ -65,16 +67,15 @@ class Pan(color: RGBA): Container() {
         tip()
         for (p in points) {
             tween(
-                ::x[x, (x + p.x) / 2],
-                ::y[y, (y + p.y) / 2 - JUMP_HEIGHT],
+                ::x[x1, (x1 + p.x) / 2],
+                ::y[y1, (y1 + p.y) / 2 - JUMP_HEIGHT],
                 time = HALF_MOVE_TIME
             )
             tween(
-                ::x[x, p.x],
-                ::y[y, p.y],
+                ::x[x1, p.x],
+                ::y[y1, p.y],
                 time = HALF_MOVE_TIME
             )
-            xy(p)
         }
         unTip()
 
@@ -83,11 +84,10 @@ class Pan(color: RGBA): Container() {
     suspend fun moveTo(p: Point) {
         tip()
         tween(
-            ::x[x, p.x],
-            ::y[y, p.y],
+            ::x[x1, p.x],
+            ::y[y1, p.y],
             time = MOVE_TIME
         )
         unTip()
-        xy(p)
     }
 }

@@ -1,5 +1,6 @@
 package gui
 
+import com.soywiz.klock.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.tween.*
 import com.soywiz.korge.ui.*
@@ -15,9 +16,10 @@ import com.soywiz.korma.geom.vector.*
 import halma.*
 import halma.StarhalmaStaticBoardMappings.extendedHome
 import halma.StarhalmaStaticBoardMappings.fieldsSize
+import kotlinx.coroutines.sync.*
 import misc.*
-import kotlin.native.concurrent.*
 import ui.*
+import kotlin.native.concurrent.*
 
 
 suspend fun Container.starhalmaBoardGui(
@@ -37,9 +39,11 @@ class StarhalmaBoardGui private constructor(
 
     init { scaleY = SCALE_Y }
 
+    private val animationMutex = Mutex()
+    private var spinRequest = false
+
     private val _exit = SimpleEventSuspend()
     fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
-
 
     val backg = graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
@@ -72,7 +76,7 @@ class StarhalmaBoardGui private constructor(
                 }
             }
         }
-        }) {
+        } ) {
         xy(midpoint)
         anchor(0.5, 0.5)
     }
@@ -137,6 +141,14 @@ class StarhalmaBoardGui private constructor(
         pans = panList
     }
 
+    /*
+    private fun correctPans() {
+        for (pan in pans) {
+            pan.xy(spinF(spin, pan.fieldIdx))
+        }
+    }
+    */
+
     private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
 
@@ -174,6 +186,17 @@ class StarhalmaBoardGui private constructor(
     private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
     private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
 
+    private suspend fun spinAnimation(angle: Angle) {
+        disableSpinButtons()
+        spinRequest = true
+        animationMutex.withLock {
+            spinRequest = false
+            tween(::spin[(spin.degrees + angle.degrees).degrees])
+            enableSpinButtons()
+            delay(1000.milliseconds)
+        }
+    }
+
 
     override val goButton = uiButton("") {
         enabled = false
@@ -181,7 +204,6 @@ class StarhalmaBoardGui private constructor(
         scaledHeight = BUTTON_SIZE
         scaledWidth = BUTTON_SIZE
         y = (STAR_HALMA_BOARD_GUI_HEIGHT - height - GO_BUTTON_Y_PADDING) / SCALE_Y
-        //alignBottomToBottomOf(this@StarhalmaBoardGui, GO_BUTTON_Y_PADDING)
         alignRightToRightOf(this@StarhalmaBoardGui, GO_BUTTON_X_PADDING)
 
         image(goButtonIcon) {
@@ -195,8 +217,7 @@ class StarhalmaBoardGui private constructor(
         scaledWidth = BUTTON_SIZE
         alignTopToTopOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         alignLeftToLeftOf(this@StarhalmaBoardGui, BUTTON_PADDING)
-        onClick { tween(::spin[(spin.degrees + 60).degrees]) }
-
+        onClick { spinAnimation(60.degrees) }
         image(clockwiseIcon) {
             scaledHeight = BUTTON_IMAGE_SIZE
             scaledWidth = BUTTON_IMAGE_SIZE
@@ -208,8 +229,7 @@ class StarhalmaBoardGui private constructor(
         scaledWidth = BUTTON_SIZE
         alignTopToTopOf(spinClockwiseButton)
         alignLeftToRightOf(spinClockwiseButton, BUTTON_PADDING)
-        onClick { tween(::spin[(spin.degrees - 60).degrees]) }
-
+        onClick { spinAnimation((-60).degrees) }
         image(antiClockwiseIcon) {
             scaledHeight = BUTTON_IMAGE_SIZE
             scaledWidth = BUTTON_IMAGE_SIZE
@@ -243,16 +263,13 @@ class StarhalmaBoardGui private constructor(
         onClick { togglePause() }
     }
 
-    private val buttons = listOf(
-        _pauseButton,
-        cancelButton,
-        goButton,
-        spinClockwiseButton,
-        spinAntiClockwiseButton
-    )
+    private val spinButtons = listOf(spinClockwiseButton, spinAntiClockwiseButton)
+    private val buttons =  spinButtons + listOf(_pauseButton, cancelButton, goButton)
 
     private fun disableButtons() { buttons.forEach { it.disable() } }
     private fun enableButtons() { buttons.forEach { it.enable() } }
+    private fun disableSpinButtons() { spinButtons.forEach { it.disable() } }
+    private fun enableSpinButtons() { spinButtons.forEach { it.enable() } }
 
 
     val roundText = uiText("Game starts") {
@@ -267,7 +284,6 @@ class StarhalmaBoardGui private constructor(
         stroke = Colors.BLACK
         strokeThickness = MSG_BOX_LINE_THICKNESS
         y = (STAR_HALMA_BOARD_GUI_HEIGHT - height) / SCALE_Y
-        //alignBottomToBottomOf(this@StarhalmaBoardGui, BUTTON_PADDING)
         alignLeftToLeftOf(this@StarhalmaBoardGui, BUTTON_PADDING)
     }
 
@@ -309,20 +325,30 @@ class StarhalmaBoardGui private constructor(
 
     override suspend fun move(move: Move) {
         starhalmaBoard.move(move)
-        when (move) {
-            is Move.Walk -> {
-                val pan = panAt(move.startFieldIdx)
-                val p = spinF(spin, move.destFieldIdx)
-                pan.fieldIdx = move.destFieldIdx
-                pan.moveTo(p)
+
+        animationMutex.lock()
+        try {
+            while (spinRequest) {
+                animationMutex.unlock()
+                animationMutex.lock()
             }
-            is Move.Jump -> {
-                val pan = panAt(move.startFieldIdx)
-                val points = move.destFieldIdxList.map { spinF(spin, it) }
-                pan.fieldIdx = move.destFieldIdx
-                pan.moveTo(points)
+
+            when (move) {
+                is Move.Walk -> {
+                    val pan = panAt(move.startFieldIdx)
+                    val p = spinF(spin, move.destFieldIdx)
+                    pan.fieldIdx = move.destFieldIdx
+                    pan.moveTo(p)
+                }
+
+                is Move.Jump -> {
+                    val pan = panAt(move.startFieldIdx)
+                    val points = move.destFieldIdxList.map { spinF(spin, it) }
+                    pan.fieldIdx = move.destFieldIdx
+                    pan.moveTo(points)
+                }
             }
-        }
+        } finally { animationMutex.unlock() }
     }
 
     override fun panAt(fieldIdx: Int): Pan {
