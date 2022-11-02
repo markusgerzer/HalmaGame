@@ -29,7 +29,7 @@ class PlayerGui<T: BoardGui>(
     private val channel = Channel<Move>(0)
     private var idxList = listOf<Int>()
 
-    fun goButtonEnable() {
+    private fun goButtonEnable() {
         game.board.goButton.let {
             it.visible = true
             it.enabled = true
@@ -37,14 +37,14 @@ class PlayerGui<T: BoardGui>(
         }
     }
 
-    fun goButtonDisable() {
+    private fun goButtonDisable() {
         game.board.goButton.run {
             visible = false
             enabled = false
         }
     }
 
-    suspend fun fieldSelect(fieldGui: FieldGui) {
+    private suspend fun fieldSelect(fieldGui: FieldGui) {
         if (idxList.isEmpty()) return
 
         if (idxList.last() == fieldGui.idx) {
@@ -60,14 +60,22 @@ class PlayerGui<T: BoardGui>(
         else {
             val move = game.board.validMoveOfOrNull(idxList + fieldGui.idx)
             if (move != null) {
-                idxList += fieldGui.idx
-                fieldGui.mark()
+                val oldIdxList = idxList
+                idxList = when (move) {
+                    is Move.Walk -> listOf(move.startFieldIdx, move.destFieldIdx)
+                    is Move.Jump -> listOf(move.startFieldIdx) + move.destFieldIdxList
+                }
+                for (idx in oldIdxList.filterNot { it in idxList })
+                    game.board.guiFields[idx].unMark()
+                for (idx in idxList) {
+                    game.board.guiFields[idx].mark()
+                }
                 goButtonEnable()
             }
         }
     }
 
-    suspend fun panSelect(pan: Pan) {
+    private suspend fun panSelect(pan: Pan) {
         if (game.board.possibleMoves(pan.fieldIdx).toList().isEmpty()) return
 
         if (idxList.isNotEmpty()) {
@@ -81,13 +89,13 @@ class PlayerGui<T: BoardGui>(
         game.board.guiFields[pan.fieldIdx].mark()
     }
 
-    fun setPansOnClick(block: (suspend(Pan) -> Unit)?) {
+    private fun setPansOnClick(block: (suspend(Pan) -> Unit)?) {
         for (pan in playerPans) {
             pan.onClickCallback = block
         }
     }
 
-    fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)?) {
+    private fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)?) {
         for (guiField in game.board.guiFields) {
             guiField.onClickCallback = block
         }

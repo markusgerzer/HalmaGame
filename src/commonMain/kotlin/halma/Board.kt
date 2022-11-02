@@ -10,18 +10,19 @@ interface Board : StaticBoardMappings {
     fun isValidMove(move: Move): Boolean
     suspend fun move(move: Move)
 
-    fun validMoveOfOrNull(idxList: List<Int>): Move? {
+    fun validMoveOfOrNull(idxList: List<Int>) : Move? {
         if (idxList.size < 2) return null
-
-        if (idxList.size == 2) {
-            val walk = Move.Walk(idxList[0], idxList[1])
-            if (isValidMove(walk)) return walk
+        val moves = buildList {
+            for (move in possibleMoves(idxList.first())) {
+                if (move.destFieldIdx == idxList.last()) {
+                    when (move) {
+                        is Move.Walk -> return move
+                        is Move.Jump -> add(move)
+                    }
+                }
+            }
         }
-
-        val jump = Move.Jump(idxList[0], idxList.drop(1))
-        if (isValidMove(jump)) return jump
-
-        return null
+        return moves.minByOrNull { it.destFieldIdxList.size }
     }
 
     fun hookBeforeMove(player: Player<out Board>) {}
