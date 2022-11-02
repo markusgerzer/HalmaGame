@@ -62,7 +62,7 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
     }
 
     private val playerColors = List(6) {
-        uiText(StarhalmaBoardGui.defaultPlayerNames[it]) {
+        uiText(StarhalmaBoardGuiConfig.defaultPlayerNames[it]) {
             textColor = Colors.BLACK
             alignLeftToLeftOf(playerColorLabel)
             alignTopToTopOf(playerTypes[it])
