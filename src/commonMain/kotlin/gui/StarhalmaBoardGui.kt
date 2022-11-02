@@ -87,7 +87,6 @@ class StarhalmaBoardGui private constructor(
         anchor(0.5, 0.5)
     }
 
-
     override val guiFields = List(fieldsSize) { idx ->
         StarhalmaFieldGui(idx).addTo(this)
     }
@@ -104,14 +103,6 @@ class StarhalmaBoardGui private constructor(
         }
         pans = panList
     }
-
-    /*
-    private fun correctPans() {
-        for (pan in pans) {
-            pan.xy(spinF(spin, pan.fieldIdx))
-        }
-    }
-    */
 
     private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
@@ -336,7 +327,7 @@ class StarhalmaBoardGui private constructor(
         private lateinit var antiClockwiseIcon: Bitmap
 
         private var isInitialized = false
-        suspend operator fun invoke (
+        suspend operator fun invoke(
             numberOfPlayers: Int,
             starhalmaBoard: StarhalmaBoard = StarhalmaBoard(numberOfPlayers),
             playerColors: List<RGBA> = StarhalmaBoardGuiConfig.defaultPlayerColors,
