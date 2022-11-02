@@ -7,26 +7,26 @@ import com.soywiz.korma.geom.PointArrayList
 import halma.StarhalmaStaticBoardMappings
 
 object StarhalmaBoardGuiConfig {
-    const val STAR_HALMA_BOARD_GUI_WIDTH = 512.0 //2600.0
-    const val STAR_HALMA_BOARD_GUI_HEIGHT = 512.0 //2600.0
+    const val STAR_HALMA_BOARD_GUI_WIDTH = 512.0
+    const val STAR_HALMA_BOARD_GUI_HEIGHT = 512.0
     const val SCALE_Y = 0.82
-    const val FIELD_RADIUS = 7.0 //35.0
-    const val MARK_RADIUS = 12.0 //60.0
-    const val LINE_THICKNESS = 0.6 //3.0
+    const val FIELD_RADIUS = 7.0
+    const val MARK_RADIUS = 12.0
+    const val LINE_THICKNESS = 0.6
     const val MARK_LINE_THICKNESS = 7.0 * LINE_THICKNESS
-    const val BUTTON_SIZE = 46.0 //230.0
+    const val BUTTON_SIZE = 46.0
     const val BUTTON_IMAGE_SIZE = .9 * BUTTON_SIZE
-    const val ROUND_TEXT_SIZE = 16.0 //80.0
-    const val MSG_TEXT_SIZE = 20.0 //96.0
-    const val MSG_BOX_LINE_THICKNESS = 6.0 * LINE_THICKNESS
-    const val BUTTON_PADDING = 17.0 //50.0
-    const val MSG_TEXT_PADDING = 15.0 //75.0
-    const val MSG_BOX_WIDTH = 180 //900
-    const val MSG_BOX_HEIGHT = 100 //500
-    const val MSG_BOX_RX = 4 //20
-    const val GO_BUTTON_X_PADDING = 50 //250
-    const val GO_BUTTON_Y_PADDING = 30 //150
-    const val xFactor = 20.0 //100.0
+    const val ROUND_TEXT_SIZE = 16.0
+    const val MSG_TEXT_SIZE = 20.0
+    const val MSG_BOX_STROKE_THICKNESS = 12.0 * LINE_THICKNESS
+    const val BUTTON_PADDING = 17.0
+    const val MSG_TEXT_PADDING = 15.0
+    const val MSG_BOX_WIDTH = 180
+    const val MSG_BOX_HEIGHT = 100
+    const val MSG_BOX_RX = 4
+    const val GO_BUTTON_X_PADDING = 50
+    const val GO_BUTTON_Y_PADDING = 30
+    const val xFactor = 20.0
     const val yFactor = 1.7320508076 * xFactor //sqrt(3.0) * xFactor
 
     val fieldCoordinates0: List<Point>

@@ -252,7 +252,7 @@ class StarhalmaBoardGui private constructor(
         StarhalmaBoardGuiConfig.MSG_BOX_RX
     ) {
         stroke = Colors.BLACK
-        strokeThickness = StarhalmaBoardGuiConfig.MSG_BOX_LINE_THICKNESS
+        strokeThickness = StarhalmaBoardGuiConfig.MSG_BOX_STROKE_THICKNESS
         y = (StarhalmaBoardGuiConfig.STAR_HALMA_BOARD_GUI_HEIGHT - height) / StarhalmaBoardGuiConfig.SCALE_Y
         alignLeftToLeftOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.BUTTON_PADDING)
     }
@@ -274,6 +274,7 @@ class StarhalmaBoardGui private constructor(
             is PlayerGui -> "$playerName player\nplease make\nyour move.\n"
             else -> "???"
         }
+        msgBox.stroke = playerColors[player.id - 1]
     }
 
     override suspend fun hookGameEnd(winner: Player<out Board>) {
