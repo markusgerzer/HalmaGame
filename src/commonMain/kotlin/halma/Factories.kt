@@ -1,6 +1,7 @@
 package halma
 
-import gui.BoardGui
+import com.soywiz.korge.view.*
+import gui.*
 
 
 fun <T: Board>makeBoard(
@@ -29,11 +30,11 @@ fun <B: Board>makeGame(
     }
 }
 
-suspend fun <D: BoardGui, B: Board>makeGame(
-    decorator: suspend (Int, B) -> D,
-    boardClass: (Int) -> B,
-    playerClasses: List<(Int, List<Int>) -> Player<D>>,
-    block: suspend Game<D>.()->Unit = { }
+suspend fun <D: BoardGui, B: Board> Container.makeGame(
+    decorator: BoardGuiCreator<D, B>,
+    boardClass: BoardCreator<B>,
+    playerClasses: List<PlayerCreator<D>>,
+    block: suspend Game<D>.() -> Unit = { }
 ): Game<D> {
     val numberOfPlayers = playerClasses.size
     makeBoard(numberOfPlayers, boardClass).apply {

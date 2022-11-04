@@ -1,15 +1,11 @@
-import com.soywiz.korge.Korge
-import com.soywiz.korge.scene.Module
-import com.soywiz.korge.scene.Scene
-import com.soywiz.korim.color.Colors
-import com.soywiz.korinject.AsyncInjector
-import com.soywiz.korma.geom.SizeInt
+import com.soywiz.korge.*
+import com.soywiz.korge.scene.*
+import com.soywiz.korim.color.*
+import com.soywiz.korinject.*
+import com.soywiz.korma.geom.*
 import gui.*
-import halma.*
-import kotlin.reflect.KClass
+import kotlin.reflect.*
 
-var playerClasses: List<(Int, List<Int>) -> Player<StarhalmaBoardGui>> = emptyList()
-//var playerClasses: List<(Int, List<Int>) -> Player<StarhalmaBoardGui>> = listOf(::PlayerAI, ::PlayerGui)
 
 suspend fun main() = Korge(Korge.Config(module = ConfigModule))
 

@@ -44,7 +44,7 @@ class StarhalmaBoardGui private constructor(
     private var spinRequest = false
 
     private val _exit = SimpleEventSuspend()
-    fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
+    override fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
 
     val backg = graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
