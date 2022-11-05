@@ -38,7 +38,12 @@ class StarhalmaBoardGui private constructor(
     StarhalmaBoardGuiConfig.STAR_HALMA_BOARD_GUI_HEIGHT
 ), Board by starhalmaBoard, BoardGui {
 
-    init { scaleY = StarhalmaBoardGuiConfig.SCALE_Y }
+    init {
+        require(numberOfPlayers <= playerColors.size)
+        require(numberOfPlayers <= playerNames.size)
+
+        scaleY = StarhalmaBoardGuiConfig.SCALE_Y
+    }
 
     private val animationMutex = Mutex()
     private var spinRequest = false
