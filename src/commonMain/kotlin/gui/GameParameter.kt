@@ -5,7 +5,7 @@ import com.soywiz.korim.color.*
 import halma.*
 
 
-typealias BoardGuiCreator<D, B> = suspend Container.(Int, B) -> D
+typealias BoardGuiCreator<D, B> = suspend Container.(Int, B, List<RGBA>, List<String>) -> D
 typealias BoardCreator<B> = (Int) -> B
 typealias PlayerCreator<D> = (Int, List<Int>) -> Player<D>
 

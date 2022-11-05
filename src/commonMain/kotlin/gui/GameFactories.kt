@@ -1,9 +1,7 @@
 package gui
 
-import com.soywiz.korge.view.Container
-import halma.Board
-import halma.Game
-import halma.makeBoard
+import com.soywiz.korge.view.*
+import halma.*
 
 /*
 suspend fun <D: BoardGui, B: Board> Container.makeGame(
@@ -25,18 +23,34 @@ suspend fun <D: BoardGui, B: Board> Container.makeGame(
     }
 }*/
 
+
 suspend fun <D: BoardGui, B: Board> Container.makeGame(
     gameParameter: GameParameter<D, B>
-): Game<D> {
+) =
+    with(gameParameter) {
+    val container = this@makeGame
     val numberOfPlayers = gameParameter.playerCreators.size
-    makeBoard(numberOfPlayers, gameParameter.boardCreator).apply {
-        val boardGui = gameParameter.boardGuiCreator(this@makeGame, numberOfPlayers, this)
-        val players = gameParameter.playerCreators.mapIndexed { i, Player ->
-            Player(i + 1, idToHomeMaps[numberOfPlayers - 1][i + 1]!!)
+
+    makeBoard(numberOfPlayers, boardCreator)
+        .let { board ->
+            val boardGui =
+                boardGuiCreator(
+                    container,
+                    numberOfPlayers,
+                    board,
+                    playerColors,
+                    playerNames
+                )
+
+            val players =
+                playerCreators
+                    .mapIndexed { i, Player ->
+                        Player(i + 1, board.idToHomeMaps[numberOfPlayers - 1][i + 1]!!)
+                    }
+
+            Game(boardGui, players, block)
+                .also { game ->
+                    players.forEach { it.game = game }
+                }
         }
-        return Game(boardGui, players, gameParameter.block)
-            .also { game ->
-                players.forEach { it.game = game }
-            }
-    }
 }
