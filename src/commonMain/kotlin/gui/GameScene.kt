@@ -11,13 +11,7 @@ class GameScene : Scene() {
     override suspend fun SContainer.sceneMain() {
         val gameParameter = injector.get<GameParameter<StarhalmaBoardGui, StarhalmaBoard>>()
 
-        val game =
-            makeGame(
-                gameParameter.boardGuiCreator,
-                gameParameter.boardCreator,
-                gameParameter.playerCreators,
-                gameParameter.block
-            )
+        val game = makeGame(gameParameter)
 
         game.board.onExit { sceneContainer.back() }
         game.start()
