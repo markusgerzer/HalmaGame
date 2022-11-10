@@ -110,8 +110,7 @@ class StarhalmaBoardGui private constructor(
     private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
 
-    private val pauseText = uiText("P A U S E D") {
-        visible = false
+    private val pauseText = UIText("P A U S E D").apply {
         textColor = Colors.BLACK.withAd(.5)
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE * 3
         textAlignment = TextAlignment.MIDDLE_CENTER
@@ -120,10 +119,10 @@ class StarhalmaBoardGui private constructor(
 
     private fun pause() {
         boardElements.forEach { it.speed = 0.0 }
-        pauseText.visible = true
+        pauseText.addTo(this)
     }
     private fun endPause() {
-        pauseText.visible = false
+        pauseText.removeFromParent()
         boardElements.forEach { it.speed = 1.0 }
     }
     private fun togglePause() { if (paused) endPause() else pause() }
@@ -144,14 +143,38 @@ class StarhalmaBoardGui private constructor(
     private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
     private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
 
+    private val waitingForMoveCompletionText = UIText("Rotating Board when move has completed.").apply {
+        textColor = Colors.BLACK.withAd(.5)
+        textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE
+        textAlignment = TextAlignment.MIDDLE_CENTER
+        xy(StarhalmaBoardGuiConfig.midpoint - Point(windowBounds.width / 2, windowBounds.height * 1.3))
+    }
+
+    private var spinAnimationIsRunning = false
     private suspend fun spinAnimation(angle: Angle) {
-        disableSpinButtons()
-        spinRequest = true
-        animationMutex.withLock {
+        suspend fun doSpinAnimation() {
             spinRequest = false
+            spinAnimationIsRunning = true
             tween(::spin[(spin.degrees + angle.degrees).degrees])
             enableSpinButtons()
             delay(1000.milliseconds)
+            spinAnimationIsRunning = false
+        }
+
+        disableSpinButtons()
+        spinRequest = true
+        if (animationMutex.tryLock()) {
+            try { doSpinAnimation() }
+            finally {
+                animationMutex.unlock()
+            }
+        }
+        else {
+            if (!spinAnimationIsRunning) waitingForMoveCompletionText.addTo(this)
+            animationMutex.withLock {
+                waitingForMoveCompletionText.removeFromParent()
+                doSpinAnimation()
+            }
         }
     }
 
