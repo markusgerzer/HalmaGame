@@ -12,7 +12,7 @@ object StarhalmaBoardGuiConfig {
     const val SCALE_Y = 0.82
     const val FIELD_RADIUS = 7.0
     const val MARK_RADIUS = 12.0
-    const val LINE_THICKNESS = 0.6
+    const val LINE_THICKNESS = 0.63
     const val MARK_LINE_THICKNESS = 7.0 * LINE_THICKNESS
     const val BUTTON_SIZE = 46.0
     const val BUTTON_IMAGE_SIZE = .9 * BUTTON_SIZE
