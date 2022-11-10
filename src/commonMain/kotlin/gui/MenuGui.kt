@@ -8,10 +8,10 @@ import halma.*
 import ui.*
 
 
-fun Container.menuGui(onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit) =
+fun Container.menuGui(onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBoard>) -> Unit) =
     MenuGui(onStart).addTo(this)
 
-class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoardGui>>) -> Unit): Container() {
+class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBoard>) -> Unit): Container() {
 
     private val playerNrLabel = uiText("Nr.") {
         textColor = Colors.BLACK
@@ -31,41 +31,30 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
         alignLeftToLeftOf(playerColorLabel, 150)
     }
 
-    private val playerTypes = List(6) {
-        val items = supportedTypes
-            .keys.toList()
-            .run { if (it == 0) drop(1) else this }
-        uiComboBox(200.0, items = items) {
-            deactivate()
-        }
-    }
-    init {
-        playerTypes.forEach { it.alignLeftToLeftOf(playerTypeLabel) }
-        playerTypes[0].alignTopToBottomOf(playerTypeLabel, 20)
-        playerTypes.zipWithNext { a, b ->
-            b.alignTopToBottomOf(a, 10)
-        }
+    private val playerColors = uiComboBoxArray2(
+        boxPadding = 5.0,
+        items = supportedColors.keys.toList(),
+        numberOfComboBoxes = 6
+    ) {
+        alignLeftToLeftOf(playerColorLabel)
+        alignTopToBottomOf(playerColorLabel, 20)
 
-        playerTypes[0].activate()
-        playerTypes[1].activate()
-        for (i in 1 until playerTypes.size - 1) {
-            playerTypes[i].onSelectionUpdate {
-                if (it.selectedIndex > 0) playerTypes[i + 1].activate()
-                else {
-                    for (j in i + 1 until playerTypes.size) {
-                        playerTypes[j].deactivate()
-                        playerTypes[j].selectedIndex = 0
-                    }
-                }
-            }
-        }
+        for (i in 1 until numberOfComboBoxes) deactivateComboBox(i)
     }
 
-    private val playerColors = List(6) {
-        uiText(StarhalmaBoardGuiConfig.defaultPlayerNames[it]) {
-            textColor = Colors.BLACK
-            alignLeftToLeftOf(playerColorLabel)
-            alignTopToTopOf(playerTypes[it])
+    private val playerTypes = uiComboBoxArray1(
+        boxWidth = 200.0,
+        boxPadding = 5.0,
+        items = supportedTypes.keys.toList(),
+        deactivationSymbol = "-",
+        numberOfComboBoxes = 6
+    ) {
+        alignLeftToLeftOf(playerTypeLabel)
+        alignTopToBottomOf(playerTypeLabel, 20)
+
+        onSelectionUpdate { idx ->
+            if (selectedItems[idx] == null) playerColors.deactivateComboBox(idx)
+            else playerColors.activateComboBox(idx)
         }
     }
 
@@ -81,7 +70,7 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
 
     val startButton = uiButton("S T A R T") {
         centerXOn(this@MenuGui)
-        alignTopToBottomOf(playerTypes.last(), 20)
+        alignTopToBottomOf(playerTypes[5], 20)
         onClick { startGame() }
     }
 
@@ -90,14 +79,28 @@ class MenuGui(val onStart: suspend (List<(Int, List<Int>) -> Player<StarhalmaBoa
     }
 
     private suspend fun startGame() {
-        val playerTypeName = playerTypes.map { it.selectedItem }
+        val playerTypeName = playerTypes.selectedItems
         val player = playerTypeName.mapNotNull { supportedTypes[it] }
-        onStart(player)
+
+        val playerColorNames = playerColors.selectedItems.filterNotNull()
+        val playerColors = playerColorNames.mapNotNull { supportedColors[it] }
+
+        val gameParameter = GameParameter(
+            Container::starhalmaBoardGui,
+            ::StarhalmaBoard,
+            player,
+            playerColors,
+            playerColorNames
+        )
+        onStart(gameParameter)
     }
 
     companion object {
+        val supportedColors = StarhalmaBoardGuiConfig.defaultPlayerNames
+            .zip(StarhalmaBoardGuiConfig.defaultPlayerColors)
+            .toMap()
+
         val supportedTypes: Map<String, ((Int, List<Int>) -> Player<StarhalmaBoardGui>)?> = mapOf(
-            "-" to null,
             "Human Player" to ::PlayerGui,
             "AI" to ::PlayerAI,
             "Hashed AI" to ::PlayerHashedAI,
