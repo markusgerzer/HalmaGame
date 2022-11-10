@@ -15,7 +15,6 @@ import com.soywiz.korma.geom.*
 import com.soywiz.korma.geom.vector.*
 import halma.*
 import kotlinx.coroutines.sync.*
-import misc.*
 import ui.*
 import kotlin.native.concurrent.*
 
@@ -48,8 +47,7 @@ class StarhalmaBoardGui private constructor(
     private val animationMutex = Mutex()
     private var spinRequest = false
 
-    private val _exit = SimpleEventSuspend()
-    override fun onExit(callback: suspend () -> Unit) = _exit.addCallback(callback)
+    override val onExit = Signal<Unit>()
 
     val backg = graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
@@ -207,7 +205,7 @@ class StarhalmaBoardGui private constructor(
             disableButtons()
             pause()
             stage?.confirmBox("Exit Game?", 300.0, 100.0, 20.0, 20.0) {
-                onConfirm { _exit() }
+                onConfirm { onExit() }
                 onNoConfirm {
                     if (!gameWasPaused) endPause()
                     enableButtons()
