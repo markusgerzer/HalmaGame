@@ -9,7 +9,7 @@ import ui.*
 
 
 fun Container.menuGui(onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBoard>) -> Unit) =
-    MenuGui(onStart).addTo(this)
+    MenuGui(onStart).addTo(this) { centerOnStage() }
 
 class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBoard>) -> Unit): Container() {
 
@@ -19,16 +19,16 @@ class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBo
         alignLeftToLeftOf(this@MenuGui, 50)
     }
 
-    private val playerColorLabel = uiText("Color") {
-        textColor = Colors.BLACK
-        alignTopToTopOf(playerNrLabel)
-        alignLeftToLeftOf(playerNrLabel, 50)
-    }
-
     private val playerTypeLabel = uiText("Player") {
         textColor = Colors.BLACK
-        alignTopToTopOf(playerColorLabel)
-        alignLeftToLeftOf(playerColorLabel, 150)
+        alignTopToTopOf(playerNrLabel)
+        alignLeftToLeftOf(playerNrLabel, 25)
+    }
+
+    private val playerColorLabel = uiText("Color") {
+        textColor = Colors.BLACK
+        alignTopToTopOf(playerTypeLabel)
+        alignLeftToLeftOf(playerTypeLabel, 225)
     }
 
     private val playerColors = uiComboBoxArray2(
@@ -38,15 +38,15 @@ class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBo
     ) {
         alignLeftToLeftOf(playerColorLabel)
         alignTopToBottomOf(playerColorLabel, 20)
-
         for (i in 1 until numberOfComboBoxes) deactivateComboBox(i)
+        onSelectionUpdate { updatePan(it) }
     }
 
     private val playerTypes = uiComboBoxArray1(
         boxWidth = 200.0,
         boxPadding = 5.0,
         items = supportedTypes.keys.toList(),
-        deactivationSymbol = "-",
+        deactivationSymbol = "",
         numberOfComboBoxes = 6
     ) {
         alignLeftToLeftOf(playerTypeLabel)
@@ -55,27 +55,40 @@ class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBo
         onSelectionUpdate { idx ->
             if (selectedItems[idx] == null) playerColors.deactivateComboBox(idx)
             else playerColors.activateComboBox(idx)
+            updatePan(idx)
         }
     }
 
-    init {
-        for (i in 0 until 6) {
-            uiText("${i + 1}") {
-                textColor = Colors.BLACK
-                alignLeftToLeftOf(playerNrLabel)
-                alignTopToTopOf(playerTypes[i])
+    val playerNr = List(6) {
+        uiText("${it + 1}") {
+            textColor = Colors.BLACK
+            alignLeftToLeftOf(playerNrLabel)
+            centerYOn(playerTypes[it])
+        }
+    }
+
+    private val pans = Array(6) { pan(it) }
+
+    private fun updatePan(idx: Int) {
+        pans[idx]?.removeFromParent()
+        pans[idx] = pan(idx)
+    }
+
+    private fun pan(idx: Int): Pan? {
+        val colorName = playerColors.selectedItems[idx]
+        val color = supportedColors[colorName]
+        return color?.let {
+            pan(it).apply {
+                alignLeftToRightOf(playerColors, 10)
+                centerYOn(playerNr[idx])
             }
         }
     }
 
     val startButton = uiButton("S T A R T") {
         centerXOn(this@MenuGui)
-        alignTopToBottomOf(playerTypes[5], 20)
+        alignTopToBottomOf(playerNr.last(), 50)
         onClick { startGame() }
-    }
-
-    init {
-        centerOnStage()
     }
 
     private suspend fun startGame() {
