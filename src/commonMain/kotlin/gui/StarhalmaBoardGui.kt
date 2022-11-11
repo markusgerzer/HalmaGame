@@ -227,7 +227,7 @@ class StarhalmaBoardGui private constructor(
             val gameWasPaused = paused
             disableButtons()
             pause()
-            stage?.confirmBox(S.exitConfirm, 300.0, 100.0, 20.0, 20.0) {
+            stage?.confirmBox(S.exitConfirm, 300.0, 100.0, 20.0, 20.0, S.yes, S.no) {
                 onConfirm { onExit() }
                 onNoConfirm {
                     if (!gameWasPaused) endPause()

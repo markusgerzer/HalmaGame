@@ -28,6 +28,8 @@ sealed interface Strings {
     val exitConfirm: String
     val gameStarts: String
     val aiType: String
+    val yes: String
+    val no: String
     val round: (Int) -> String
     val compMoveMsg: (String) -> String
     val payerMoveMsg: (String) -> String
@@ -55,6 +57,8 @@ object EN : Strings {
     override val exitConfirm = "Exit Game?"
     override val gameStarts = "Game starts"
     override val aiType = "[Computer]"
+    override val yes = "Yes"
+    override val no = "No"
     override val round = { i: Int -> "Round $i" }
     override val compMoveMsg = { name: String ->
         "$name player\n" +
@@ -92,6 +96,8 @@ object DE : Strings {
     override val exitConfirm = "Spiel beenden?"
     override val gameStarts = "Spiel started"
     override val aiType = "[Computer]"
+    override val yes = "Ja"
+    override val no = "Nein"
     override val round = { i: Int -> "Runde $i" }
     override val compMoveMsg = { name: String ->
         "Spieler $name player\n" +
