@@ -71,5 +71,8 @@ object StarhalmaBoardGuiConfig {
         Colors.DARKRED, Colors.LIGHTSKYBLUE, Colors.DARKGREEN,
         Colors.VIOLET, Colors.DIMGREY, Colors.BLACK
     )
-    val defaultPlayerNames = listOf("Red", "Blue", "Green", "Violet", "Grey", "Black")
+    val defaultPlayerNames = listOf(
+        S.colorRed, S.colorBlue, S.colorGreen,
+        S.colorViolet, S.colorGrey, S.colorBlack
+    )
 }

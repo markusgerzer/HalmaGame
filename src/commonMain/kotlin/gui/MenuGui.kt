@@ -13,19 +13,19 @@ fun Container.menuGui(onStart: suspend (GameParameter<StarhalmaBoardGui, Starhal
 
 class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBoard>) -> Unit): Container() {
 
-    private val playerNrLabel = uiText("Nr.") {
+    private val playerNrLabel = uiText(S.nrLabel) {
         textColor = Colors.BLACK
         alignTopToTopOf(this@MenuGui, 50)
         alignLeftToLeftOf(this@MenuGui, 50)
     }
 
-    private val playerTypeLabel = uiText("Player") {
+    private val playerTypeLabel = uiText(S.typeLabel) {
         textColor = Colors.BLACK
         alignTopToTopOf(playerNrLabel)
         alignLeftToLeftOf(playerNrLabel, 25)
     }
 
-    private val playerColorLabel = uiText("Color") {
+    private val playerColorLabel = uiText(S.colorLabel) {
         textColor = Colors.BLACK
         alignTopToTopOf(playerTypeLabel)
         alignLeftToLeftOf(playerTypeLabel, 225)
@@ -114,10 +114,10 @@ class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBo
             .toMap()
 
         val supportedTypes: Map<String, ((Int, List<Int>) -> Player<StarhalmaBoardGui>)?> = mapOf(
-            "Human Player" to ::PlayerGui,
-            "AI" to ::PlayerAI,
-            "Hashed AI" to ::PlayerHashedAI,
-            "Stupid AI" to ::PlayerStupidAI
+             S.playerGui to ::PlayerGui,
+             S.playerAI to ::PlayerAI,
+             S.playerHashedAI to ::PlayerHashedAI,
+             S.playerStupidAI to ::PlayerStupidAI
         )
     }
 }

@@ -110,7 +110,7 @@ class StarhalmaBoardGui private constructor(
     private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
 
-    private val pauseText = UIText("P A U S E D").apply {
+    private val pauseText = UIText(S.pause).apply {
         textColor = Colors.BLACK.withAd(.5)
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE * 3
         textAlignment = TextAlignment.MIDDLE_CENTER
@@ -143,7 +143,7 @@ class StarhalmaBoardGui private constructor(
     private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
     private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
 
-    private val waitingForMoveCompletionText = UIText("Rotating Board when move has completed.").apply {
+    private val waitingForMoveCompletionText = UIText(S.waitingForMoveCompletion).apply {
         textColor = Colors.BLACK.withAd(.5)
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE
         textAlignment = TextAlignment.MIDDLE_CENTER
@@ -227,7 +227,7 @@ class StarhalmaBoardGui private constructor(
             val gameWasPaused = paused
             disableButtons()
             pause()
-            stage?.confirmBox("Exit Game?", 300.0, 100.0, 20.0, 20.0) {
+            stage?.confirmBox(S.exitConfirm, 300.0, 100.0, 20.0, 20.0) {
                 onConfirm { onExit() }
                 onNoConfirm {
                     if (!gameWasPaused) endPause()
@@ -254,7 +254,7 @@ class StarhalmaBoardGui private constructor(
     private fun enableSpinButtons() { spinButtons.forEach { it.enable() } }
 
 
-    val roundText = uiText("Game starts") {
+    val roundText = uiText(S.gameStarts) {
         textSize = StarhalmaBoardGuiConfig.ROUND_TEXT_SIZE
         textColor = Colors.BLACK
         textAlignment = TextAlignment.RIGHT
@@ -274,7 +274,7 @@ class StarhalmaBoardGui private constructor(
         alignLeftToLeftOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.BUTTON_PADDING)
     }
 
-    private val msgText = uiText("") {
+    private val msgText = uiText(S.empty) {
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE
         textColor = Colors.BLACK
         alignLeftToLeftOf(msgBox, StarhalmaBoardGuiConfig.MSG_TEXT_PADDING)
@@ -283,13 +283,13 @@ class StarhalmaBoardGui private constructor(
 
 
     override fun hookBeforeMove(player: Player<out Board>) {
-        roundText.text = "Round ${player.game.round}"
+        roundText.text = S.round(player.game.round)
 
         val playerName = playerNames[player.id - 1]
         msgText.text = when (player) {
-            is PlayerAI, is PlayerStupidAI -> "$playerName player\n[Computer] makes\nhis move.\n"
-            is PlayerGui -> "$playerName player\nplease make\nyour move.\n"
-            else -> "???"
+            is PlayerAI, is PlayerStupidAI -> S.compMoveMsg(playerName)
+            is PlayerGui -> S.payerMoveMsg(playerName)
+            else -> S.unknown
         }
         msgBox.stroke = playerColors[player.id - 1]
     }
@@ -297,11 +297,11 @@ class StarhalmaBoardGui private constructor(
     override suspend fun hookGameEnd(winner: Player<out Board>) {
         val playerName = playerNames[winner.id - 1]
         val playerType = when (winner) {
-            is PlayerAI, is PlayerStupidAI -> "[Computer]"
-            is PlayerGui -> ""
-            else -> "???"
+            is PlayerAI, is PlayerStupidAI -> S.aiType
+            is PlayerGui -> S.empty
+            else -> S.unknown
         }
-        msgText.text = "$playerName $playerType\nhas won.\nBack to Menu\n"
+        msgText.text = S.winMsg(playerName, playerType)
         val goButtonClicked = Signal<Unit>()
         goButton.onClick {
             goButtonClicked.invoke()
