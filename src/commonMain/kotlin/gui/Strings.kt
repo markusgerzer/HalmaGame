@@ -102,7 +102,7 @@ object DE : Strings {
     override val compMoveMsg = { name: String ->
         "Spieler $name player\n" +
             "[Computer] macht\n" +
-            "seine Zug.\n"
+            "seinen Zug.\n"
     }
     override val payerMoveMsg = { name: String ->
         "Spieler $name\n" +

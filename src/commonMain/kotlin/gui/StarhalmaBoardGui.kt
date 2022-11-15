@@ -147,7 +147,8 @@ class StarhalmaBoardGui private constructor(
         textColor = Colors.BLACK.withAd(.5)
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE
         textAlignment = TextAlignment.MIDDLE_CENTER
-        xy(StarhalmaBoardGuiConfig.midpoint - Point(windowBounds.width / 2, windowBounds.height * 1.3))
+        centerXOn(this@StarhalmaBoardGui)
+        y = this@StarhalmaBoardGui.height * 0.4
     }
 
     private var spinAnimationIsRunning = false
@@ -227,7 +228,8 @@ class StarhalmaBoardGui private constructor(
             val gameWasPaused = paused
             disableButtons()
             pause()
-            stage?.confirmBox(S.exitConfirm, 300.0, 100.0, 20.0, 20.0, S.yes, S.no) {
+            stage?.uiConfirmBox(S.exitConfirm, 464.0, 128.0, 20.0, 20.0, 16.0, S.yes, S.no) {
+                textSize = 32.0
                 onConfirm { onExit() }
                 onNoConfirm {
                     if (!gameWasPaused) endPause()

@@ -16,11 +16,11 @@ fun Container.pan(color: RGBA) = Pan(color).addTo(this)
 
 class Pan(color: RGBA): Container() {
     companion object {
-        private const val HEIGHT = 16.0 //80.0
-        private const val TOP_RADIUS = 4.0 //20.0
-        private const val BOTTOM_RADIUS = 6.4 //32.0
-        private const val NECK_RADIUS = 1.0 //5.0
-        private const val JUMP_HEIGHT = 20.0 //100.0
+        private const val HEIGHT = 32.0 //16.0 //80.0
+        private const val TOP_RADIUS = 8.0 //4.0 //20.0
+        private const val BOTTOM_RADIUS = 14.0 //6.4 //32.0
+        private const val NECK_RADIUS = 2.0 //1.0 //5.0
+        private const val JUMP_HEIGHT = 40.0 //20.0 //100.0
         private val MOVE_TIME = 1000.milliseconds
         private val HALF_MOVE_TIME = 500.milliseconds
     }
