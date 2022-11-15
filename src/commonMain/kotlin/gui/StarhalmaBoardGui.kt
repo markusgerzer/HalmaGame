@@ -16,6 +16,7 @@ import com.soywiz.korma.geom.vector.*
 import halma.*
 import kotlinx.coroutines.sync.*
 import ui.*
+import zoom.*
 import kotlin.native.concurrent.*
 
 
@@ -49,7 +50,9 @@ class StarhalmaBoardGui private constructor(
 
     override val onExit = Signal<Unit>()
 
-    val backg = graphics( {
+    private val boardElements = container { addZoomComponent(ZoomComponent(this)) }
+
+    val backg = boardElements.graphics( {
         fun polygonOfCoordinateIndices(vararg indices: Int) {
             polygon(indices.map { i ->
                 StarhalmaBoardGuiConfig.fieldCoordinates0[i] -
@@ -91,7 +94,7 @@ class StarhalmaBoardGui private constructor(
     }
 
     override val guiFields = List(fieldsSize) { idx ->
-        StarhalmaFieldGui(idx).addTo(this)
+        StarhalmaFieldGui(idx).addTo(boardElements)
     }
 
     val pans: List<Pan>
@@ -99,7 +102,7 @@ class StarhalmaBoardGui private constructor(
         val panList = mutableListOf<Pan>()
         for (i in 0 until fieldsSize) {
             if (fields[i] > 0) {
-                val pan = pan(playerColors[fields[i] - 1]).xy(StarhalmaBoardGuiConfig.fieldCoordinates0[i])
+                val pan = boardElements.pan(playerColors[fields[i] - 1]).xy(StarhalmaBoardGuiConfig.fieldCoordinates0[i])
                 pan.fieldIdx = i
                 panList.add(pan)
             }
@@ -107,7 +110,6 @@ class StarhalmaBoardGui private constructor(
         pans = panList
     }
 
-    private val boardElements = listOf(backg) + guiFields + pans
     private val paused get() = backg.speed <= 0.0
 
     private val pauseText = UIText(S.pause).apply {
@@ -118,12 +120,12 @@ class StarhalmaBoardGui private constructor(
     }
 
     private fun pause() {
-        boardElements.forEach { it.speed = 0.0 }
+        boardElements.forEachChild { it.speed = 0.0 }
         pauseText.addTo(this)
     }
     private fun endPause() {
         pauseText.removeFromParent()
-        boardElements.forEach { it.speed = 1.0 }
+        boardElements.forEachChild { it.speed = 1.0 }
     }
     private fun togglePause() { if (paused) endPause() else pause() }
 

@@ -12,6 +12,8 @@ suspend fun main() = Korge(Korge.Config(module = ConfigModule))
 object ConfigModule : Module() {
     override val windowSize = SizeInt(720, 720)
     override val size = SizeInt(1024, 1024)
+    //private val minSize = min(super.size.width, super.size.height).also { println(it) }
+    //override val size = SizeInt(minSize, minSize)
     override val bgcolor = Colors.BEIGE
     override val clipBorders = false
     override val mainScene : KClass<out Scene> = MenuScene::class
