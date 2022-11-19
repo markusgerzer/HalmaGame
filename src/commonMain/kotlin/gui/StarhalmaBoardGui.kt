@@ -12,13 +12,11 @@ import com.soywiz.korim.text.*
 import com.soywiz.korio.async.*
 import com.soywiz.korio.file.std.*
 import com.soywiz.korma.geom.*
-import com.soywiz.korma.geom.vector.*
 import halma.*
 import kotlinx.coroutines.sync.*
 import ui.*
 import zoom.*
 import kotlin.native.concurrent.*
-
 
 suspend fun Container.starhalmaBoardGui(
     numberOfPlayers: Int,
@@ -51,47 +49,7 @@ class StarhalmaBoardGui private constructor(
     override val onExit = Signal<Unit>()
 
     private val boardElements = container { addZoomComponent(ZoomComponent(this)) }
-
-    val backg = boardElements.graphics( {
-        fun polygonOfCoordinateIndices(vararg indices: Int) {
-            polygon(indices.map { i ->
-                StarhalmaBoardGuiConfig.fieldCoordinates0[i] -
-                    Point(StarhalmaBoardGuiConfig.xFactor, StarhalmaBoardGuiConfig.yFactor)
-            })
-        }
-        // Red Homes
-        fill(Colors.RED) {
-            polygonOfCoordinateIndices(0, 18, 14)
-            polygonOfCoordinateIndices(102, 106, 120)
-        }
-        // Blue Homes
-        fill(Colors.BLUE) {
-            polygonOfCoordinateIndices(18, 22, 64)
-            polygonOfCoordinateIndices(56, 102, 98)
-        }
-        // Green Homes
-        fill(Colors.GREEN) {
-            polygonOfCoordinateIndices(64, 110, 106)
-            polygonOfCoordinateIndices(10, 14, 56)
-        }
-        // Lines
-        stroke(Colors.BLACK, StrokeInfo(thickness = StarhalmaBoardGuiConfig.LINE_THICKNESS)) {
-            for (i in 0 until StarhalmaStaticBoardMappings.fieldsSize) {
-                for (n in StarhalmaStaticBoardMappings.fieldNeighbors[i]) {
-                    if (n > i) {
-                        val a = StarhalmaBoardGuiConfig.fieldCoordinates0[i] -
-                            Point(StarhalmaBoardGuiConfig.xFactor, StarhalmaBoardGuiConfig.yFactor)
-                        val b = StarhalmaBoardGuiConfig.fieldCoordinates0[n] -
-                            Point(StarhalmaBoardGuiConfig.xFactor, StarhalmaBoardGuiConfig.yFactor)
-                        line(a, b)
-                    }
-                }
-            }
-        }
-        } ) {
-        xy(StarhalmaBoardGuiConfig.midpoint)
-        anchor(0.5, 0.5)
-    }
+    private val backg = boardElements.starhalmaBoardBackground()
 
     override val guiFields = List(fieldsSize) { idx ->
         StarhalmaFieldGui(idx).addTo(boardElements)
