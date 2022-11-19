@@ -1,18 +1,18 @@
 package gui
 
-import com.soywiz.klock.milliseconds
-import com.soywiz.korge.input.onClick
-import com.soywiz.korge.tween.get
-import com.soywiz.korge.tween.tween
+import com.soywiz.klock.*
+import com.soywiz.korge.input.*
+import com.soywiz.korge.tween.*
 import com.soywiz.korge.view.*
-import com.soywiz.korim.color.RGBA
-import com.soywiz.korma.geom.Point
-import com.soywiz.korma.geom.degrees
-import com.soywiz.korma.geom.vector.circle
-import com.soywiz.korma.geom.vector.polygon
+import com.soywiz.korim.color.*
+import com.soywiz.korma.geom.*
+import com.soywiz.korma.geom.vector.*
 
 
-fun Container.pan(color: RGBA) = Pan(color).addTo(this)
+fun Container.pan(
+    color: RGBA,
+    block: @ViewDslMarker Pan.() -> Unit = {}
+) = Pan(color).addTo(this).apply(block)
 
 class Pan(color: RGBA): Container() {
     companion object {
@@ -57,8 +57,6 @@ class Pan(color: RGBA): Container() {
         tween(::rotation[0.degrees], time = HALF_MOVE_TIME)
     }
 
-    private val x1 get() = x
-    private val y1 get() = y
     suspend fun moveTo(points: List<Point>) {
         parent?.let {
             removeFromParent()
@@ -67,13 +65,13 @@ class Pan(color: RGBA): Container() {
         tip()
         for (p in points) {
             tween(
-                ::x[x1, (x1 + p.x) / 2],
-                ::y[y1, (y1 + p.y) / 2 - JUMP_HEIGHT],
+                ::x[x, (x + p.x) / 2],
+                ::y[y, (y + p.y) / 2 - JUMP_HEIGHT],
                 time = HALF_MOVE_TIME
             )
             tween(
-                ::x[x1, p.x],
-                ::y[y1, p.y],
+                ::x[x, p.x],
+                ::y[y, p.y],
                 time = HALF_MOVE_TIME
             )
         }
@@ -84,8 +82,8 @@ class Pan(color: RGBA): Container() {
     suspend fun moveTo(p: Point) {
         tip()
         tween(
-            ::x[x1, p.x],
-            ::y[y1, p.y],
+            ::x[x, p.x],
+            ::y[y, p.y],
             time = MOVE_TIME
         )
         unTip()
