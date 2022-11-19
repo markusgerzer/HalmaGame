@@ -7,12 +7,24 @@ import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
 import com.soywiz.korma.geom.*
 import com.soywiz.korma.geom.vector.*
+import halma.*
+import halma.StarhalmaStaticBoardMappings.fieldsSize
 
 
 fun Container.pan(
     color: RGBA,
     block: @ViewDslMarker Pan.() -> Unit = {}
 ) = Pan(color).addTo(this).apply(block)
+
+fun Container.panList(board: Board, playerColors:List<RGBA>) = buildList {
+    for (i in 0 until fieldsSize) {
+        if (board.fields[i] > 0) {
+            val pan = pan(playerColors[board.fields[i] - 1]).xy(StarhalmaBoardGuiConfig.fieldCoordinates0[i])
+            pan.fieldIdx = i
+            add(pan)
+        }
+    }
+}
 
 class Pan(color: RGBA): Container() {
     companion object {

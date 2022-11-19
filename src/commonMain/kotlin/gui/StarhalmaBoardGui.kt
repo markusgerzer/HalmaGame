@@ -50,23 +50,11 @@ class StarhalmaBoardGui private constructor(
 
     private val boardElements = container { addZoomComponent(ZoomComponent(this)) }
 
-    private val backg = boardElements.starhalmaBoardBackground()
+    private val background = boardElements.starhalmaBoardBackground()
     override val guiFields = boardElements.starhalmaFieldGuiList()
+    private val pans = boardElements.panList(starhalmaBoard, playerColors)
 
-    val pans: List<Pan>
-    init {
-        val panList = mutableListOf<Pan>()
-        for (i in 0 until fieldsSize) {
-            if (fields[i] > 0) {
-                val pan = boardElements.pan(playerColors[fields[i] - 1]).xy(StarhalmaBoardGuiConfig.fieldCoordinates0[i])
-                pan.fieldIdx = i
-                panList.add(pan)
-            }
-        }
-        pans = panList
-    }
-
-    private val paused get() = backg.speed <= 0.0
+    private val paused get() = background.speed <= 0.0
 
     private val pauseText = UIText(S.pause).apply {
         textColor = Colors.BLACK.withAd(.5)
@@ -87,7 +75,7 @@ class StarhalmaBoardGui private constructor(
 
     var spin = 0.degrees
         set(value) {
-            backg.rotation = value
+            background.rotation = value
             guiFields.forEach { it.spinF(value) }
             pans.forEach { it.spinF(value) }
             field = value
@@ -240,7 +228,6 @@ class StarhalmaBoardGui private constructor(
         alignLeftToLeftOf(msgBox, StarhalmaBoardGuiConfig.MSG_TEXT_PADDING)
         alignTopToTopOf(msgBox, StarhalmaBoardGuiConfig.MSG_TEXT_PADDING)
     }
-
 
     override fun hookBeforeMove(player: Player<out Board>) {
         roundText.text = S.round(player.game.round)
