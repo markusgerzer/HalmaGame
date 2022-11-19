@@ -17,3 +17,21 @@ class GameScene : Scene() {
         sceneContainer.back()
     }
 }
+
+class TestGameScene : Scene() {
+    override suspend fun SContainer.sceneMain() {
+        val game = makeGame(
+            GameParameter(
+                Container::starhalmaBoardGui,
+                ::StarhalmaBoard,
+                listOf(::PlayerStupidAI),
+                StarhalmaBoardGuiConfig.defaultPlayerColors,
+                StarhalmaBoardGuiConfig.defaultPlayerNames
+            )
+        )
+        game.board.onExit { launchImmediately { sceneContainer.changeTo<TestGameScene>() } }
+        game.start()
+
+        sceneContainer.changeTo<TestGameScene>()
+    }
+}
