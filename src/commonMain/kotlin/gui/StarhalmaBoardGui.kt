@@ -49,11 +49,9 @@ class StarhalmaBoardGui private constructor(
     override val onExit = Signal<Unit>()
 
     private val boardElements = container { addZoomComponent(ZoomComponent(this)) }
-    private val backg = boardElements.starhalmaBoardBackground()
 
-    override val guiFields = List(fieldsSize) { idx ->
-        StarhalmaFieldGui(idx).addTo(boardElements)
-    }
+    private val backg = boardElements.starhalmaBoardBackground()
+    override val guiFields = boardElements.starhalmaFieldGuiList()
 
     val pans: List<Pan>
     init {

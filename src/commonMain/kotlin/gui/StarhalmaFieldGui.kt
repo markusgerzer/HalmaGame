@@ -1,11 +1,15 @@
 package gui
 
-import com.soywiz.korge.view.anchor
-import com.soywiz.korge.view.circle
-import com.soywiz.korge.view.xy
-import com.soywiz.korim.color.Colors
+import com.soywiz.korge.view.*
+import com.soywiz.korim.color.*
 import com.soywiz.korma.geom.Point
 import halma.StarhalmaStaticBoardMappings
+import halma.StarhalmaStaticBoardMappings.fieldsSize
+
+
+fun Container.starhalmaFieldGuiList() = List(fieldsSize) { idx ->
+    StarhalmaFieldGui(idx).addTo(this)
+}
 
 class StarhalmaFieldGui(idx: Int): FieldGui(idx) {
     override var x
