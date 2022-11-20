@@ -89,13 +89,13 @@ class PlayerGui<T: BoardGui>(
         game.board.guiFields[pan.fieldIdx].mark()
     }
 
-    private fun setPansOnClick(block: (suspend(Pan) -> Unit)?) {
+    private fun setPansOnClick(block: (suspend(Pan) -> Unit)) {
         for (pan in playerPans) {
             pan.onClickCallback = block
         }
     }
 
-    private fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)?) {
+    private fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)) {
         for (guiField in game.board.guiFields) {
             guiField.onClickCallback = block
         }
@@ -107,8 +107,8 @@ class PlayerGui<T: BoardGui>(
 
         val move = channel.receive()
 
-        setPansOnClick(null)
-        setGuiFieldsOnClick(null)
+        setPansOnClick {}
+        setGuiFieldsOnClick {}
         goButtonDisable()
         for (idx in idxList) {
             game.board.guiFields[idx].unMark()

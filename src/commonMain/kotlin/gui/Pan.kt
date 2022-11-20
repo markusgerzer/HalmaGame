@@ -37,7 +37,7 @@ class Pan(color: RGBA): Container() {
         private val HALF_MOVE_TIME = 500.milliseconds
     }
     var fieldIdx = -1
-    var onClickCallback: (suspend (Pan) -> Unit)? = null
+    var onClickCallback: (suspend (Pan) -> Unit) = {}
 
     init {
         graphics {
@@ -57,7 +57,7 @@ class Pan(color: RGBA): Container() {
                 )
             }
 
-            onClick { onClickCallback?.let { block -> block(this@Pan) } }
+            onClick { onClickCallback(this@Pan) }
         }
     }
 

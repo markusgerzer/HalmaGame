@@ -6,9 +6,9 @@ import com.soywiz.korge.view.Container
 
 abstract class FieldGui(val idx: Int): Container() {
 
-    var onClickCallback: (suspend (FieldGui) -> Unit)? = null
+    var onClickCallback: (suspend (FieldGui) -> Unit) = {}
     init {
-        onClick { onClickCallback?.let { block -> block(this) } }
+        onClick { onClickCallback(this) }
     }
 
     abstract fun mark()
