@@ -15,7 +15,6 @@ import com.soywiz.korma.geom.*
 import halma.*
 import kotlinx.coroutines.sync.*
 import ui.*
-import zoom.*
 import kotlin.native.concurrent.*
 
 suspend fun Container.starhalmaBoardGui(
@@ -48,7 +47,7 @@ class StarhalmaBoardGui private constructor(
 
     override val onExit = Signal<Unit>()
 
-    private val boardElements = container { addZoomComponent(ZoomComponent(this)) }
+    private val boardElements = container { /*addZoomComponent(ZoomComponent(this))*/ }
 
     private val background = boardElements.starhalmaBoardBackground()
     override val guiFields = boardElements.starhalmaFieldGuiList()
