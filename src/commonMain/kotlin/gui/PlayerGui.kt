@@ -1,9 +1,7 @@
 package gui
 
 import com.soywiz.korge.input.onClick
-import halma.Game
-import halma.Move
-import halma.Player
+import halma.*
 import kotlinx.coroutines.channels.Channel
 
 class PlayerGui<T: BoardGui>(
@@ -13,10 +11,8 @@ class PlayerGui<T: BoardGui>(
     override lateinit var game: Game<T>
 
     private val playerPans: List<Pan> by lazy {
-        game.board.goButton.let{
-            it.onClick {
-                game.board.validMoveOfOrNull(idxList)?.let { move -> channel.send(move) }
-            }
+        game.board.goButton.onClick {
+            game.board.validMoveOfOrNull(idxList)?.let { move -> channel.send(move) }
         }
 
         val panList = mutableListOf<Pan>()
@@ -30,18 +26,13 @@ class PlayerGui<T: BoardGui>(
     private var idxList = listOf<Int>()
 
     private fun goButtonEnable() {
-        game.board.goButton.let {
-            it.visible = true
-            it.enabled = true
-
-        }
+        game.board.goButton.visible = true
+        game.board.goButton.enabled = true
     }
 
     private fun goButtonDisable() {
-        game.board.goButton.run {
-            visible = false
-            enabled = false
-        }
+        game.board.goButton.visible = false
+        game.board.goButton.enabled = false
     }
 
     private suspend fun fieldSelect(fieldGui: FieldGui) {
