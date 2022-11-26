@@ -35,13 +35,13 @@ class PlayerGui<T: BoardGui>(
         game.board.goButton.enabled = false
     }
 
-    private suspend fun fieldSelect(fieldGui: FieldGui) {
+    private suspend fun fieldSelect(fieldIdx: Int) {
         if (idxList.isEmpty()) return
 
-        if (idxList.last() == fieldGui.idx) {
+        if (idxList.last() == fieldIdx) {
             if (idxList.size == 1) panSelect(game.board.panAt(idxList[0]))
             else {
-                game.board.guiFields[fieldGui.idx].unMark()
+                game.board.unMark(fieldIdx)
                 idxList = idxList.dropLast(1)
                 val move = game.board.validMoveOfOrNull(idxList)
                 if (move == null) goButtonDisable()
@@ -49,17 +49,18 @@ class PlayerGui<T: BoardGui>(
             }
         }
         else {
-            val move = game.board.validMoveOfOrNull(idxList + fieldGui.idx)
+            val move = game.board.validMoveOfOrNull(idxList + fieldIdx)
             if (move != null) {
                 val oldIdxList = idxList
                 idxList = when (move) {
                     is Move.Walk -> listOf(move.startFieldIdx, move.destFieldIdx)
                     is Move.Jump -> listOf(move.startFieldIdx) + move.destFieldIdxList
                 }
-                for (idx in oldIdxList.filterNot { it in idxList })
-                    game.board.guiFields[idx].unMark()
+                for (idx in oldIdxList.filterNot { it in idxList }) {
+                    game.board.unMark(idx)
+                }
                 for (idx in idxList) {
-                    game.board.guiFields[idx].mark()
+                    game.board.mark(idx)
                 }
                 goButtonEnable()
             }
@@ -70,14 +71,14 @@ class PlayerGui<T: BoardGui>(
         if (game.board.possibleMoves(pan.fieldIdx).toList().isEmpty()) return
 
         if (idxList.isNotEmpty()) {
-            for (idx in idxList) game.board.guiFields[idx].unMark()
+            for (idx in idxList) game.board.unMark(idx)
             val selectedPan = game.board.panAt(idxList[0])
             if (selectedPan !== pan) selectedPan.unTip()
         }
         goButtonDisable()
         idxList = listOf(pan.fieldIdx)
         pan.tip()
-        game.board.guiFields[pan.fieldIdx].mark()
+        game.board.mark(pan.fieldIdx)
     }
 
     private fun setPansOnClick(block: (suspend(Pan) -> Unit)) {
@@ -86,23 +87,18 @@ class PlayerGui<T: BoardGui>(
         }
     }
 
-    private fun setGuiFieldsOnClick(block: (suspend (FieldGui) -> Unit)) {
-        for (guiField in game.board.guiFields) {
-            guiField.onClickCallback = block
-        }
-    }
-
     override suspend fun makeMove(): Move {
         setPansOnClick(::panSelect)
-        setGuiFieldsOnClick(::fieldSelect)
+        game.board.onEmptyFieldClicked (::fieldSelect)
 
         val move = channel.receive()
 
         setPansOnClick {}
-        setGuiFieldsOnClick {}
+        game.board.onEmptyFieldClicked.clear()
+        game.board.onEmptyFieldClicked { println("Clicked on Field $it") }
         goButtonDisable()
         for (idx in idxList) {
-            game.board.guiFields[idx].unMark()
+            game.board.unMark(idx)
         }
         idxList = emptyList()
 
