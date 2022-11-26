@@ -100,7 +100,7 @@ object DE : Strings {
     override val no = "Nein"
     override val round = { i: Int -> "Runde $i" }
     override val compMoveMsg = { name: String ->
-        "Spieler $name player\n" +
+        "Spieler $name\n" +
             "[Computer] macht\n" +
             "seinen Zug.\n"
     }
