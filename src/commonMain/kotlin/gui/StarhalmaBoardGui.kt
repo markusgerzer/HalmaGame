@@ -38,8 +38,6 @@ class StarhalmaBoardGui private constructor(
     init {
         require(numberOfPlayers <= playerColors.size)
         require(numberOfPlayers <= playerNames.size)
-
-        scaleY = StarhalmaBoardGuiConfig.SCALE_Y
     }
 
     private val animationMutex = Mutex()
@@ -47,10 +45,20 @@ class StarhalmaBoardGui private constructor(
 
     override val onExit = Signal<Unit>()
 
-    private val boardElements = container { /*addZoomComponent(ZoomComponent(this))*/ }
+    private val boardElements = container {
+        scaleY = StarhalmaBoardGuiConfig.SCALE_Y
+        /*addZoomComponent(ZoomComponent(this))*/
+    }
 
-    private val background = boardElements.starhalmaBoardBackground()
-    override val guiFields = boardElements.starhalmaFieldGuiList()
+    override val onEmptyFieldClicked = AsyncSignal<Int>()
+    init { onEmptyFieldClicked { println("Clicked on Field $it") } }
+    private val background = boardElements.starhalmaBoardBackground(onEmptyFieldClicked)
+
+    private val marks = background.starhalmaMarks()
+
+    override fun mark(fieldIdx: Int) { marks[fieldIdx].visible = true }
+    override fun unMark(fieldIdx: Int) { marks[fieldIdx].visible = false }
+
     private val pans = boardElements.panList(starhalmaBoard, playerColors)
 
     private val paused get() = background.speed <= 0.0
@@ -75,8 +83,7 @@ class StarhalmaBoardGui private constructor(
     var spin = 0.degrees
         set(value) {
             background.rotation = value
-            guiFields.forEach { it.spinF(value) }
-            pans.forEach { it.spinF(value) }
+            for (pan in pans) { pan.xy(spinF(value, pan.fieldIdx)) }
             field = value
         }
 
@@ -85,8 +92,6 @@ class StarhalmaBoardGui private constructor(
         val angle1 = Angle.fromDegrees(angle0.degrees + angle.degrees - 180.0)
         return Point.fromPolar(StarhalmaBoardGuiConfig.midpoint, angle1, r)
     }
-    private fun Pan.spinF(angle: Angle) { xy(spinF(angle, fieldIdx)) }
-    private fun StarhalmaFieldGui.spinF(angle: Angle) { xy(spinF(angle, idx)) }
 
     private val waitingForMoveCompletionText = UIText(S.waitingForMoveCompletion).apply {
         textColor = Colors.BLACK.withAd(.5)
@@ -130,9 +135,8 @@ class StarhalmaBoardGui private constructor(
         visible = false
         scaledHeight = StarhalmaBoardGuiConfig.BUTTON_SIZE
         scaledWidth = StarhalmaBoardGuiConfig.BUTTON_SIZE
-        y = (StarhalmaBoardGuiConfig.STAR_HALMA_BOARD_GUI_HEIGHT - height -
-            StarhalmaBoardGuiConfig.GO_BUTTON_Y_PADDING) / StarhalmaBoardGuiConfig.SCALE_Y
         alignRightToRightOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.GO_BUTTON_X_PADDING)
+        alignBottomToBottomOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.GO_BUTTON_Y_PADDING)
 
         image(goButtonIcon) {
             scaledHeight = StarhalmaBoardGuiConfig.BUTTON_IMAGE_SIZE
@@ -217,8 +221,8 @@ class StarhalmaBoardGui private constructor(
     ) {
         stroke = Colors.BLACK
         strokeThickness = StarhalmaBoardGuiConfig.MSG_BOX_STROKE_THICKNESS
-        y = (StarhalmaBoardGuiConfig.STAR_HALMA_BOARD_GUI_HEIGHT - height) / StarhalmaBoardGuiConfig.SCALE_Y
         alignLeftToLeftOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.BUTTON_PADDING)
+        alignBottomToBottomOf(this@StarhalmaBoardGui, StarhalmaBoardGuiConfig.BUTTON_PADDING)
     }
 
     private val msgText = uiText(S.empty) {

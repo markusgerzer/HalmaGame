@@ -5,8 +5,11 @@ import com.soywiz.korio.async.*
 import halma.Board
 
 interface BoardGui: Board {
-    val guiFields: List<FieldGui>
+    val onEmptyFieldClicked: AsyncSignal<Int>
     val goButton: UIButton
-    fun panAt(fieldIdx: Int): Pan
     val onExit: Signal<Unit>
+
+    fun panAt(fieldIdx: Int): Pan
+    fun mark(fieldIdx: Int)
+    fun unMark(fieldIdx: Int)
 }
