@@ -67,7 +67,7 @@ class StarhalmaBoardGui private constructor(
         textColor = Colors.BLACK.withAd(.5)
         textSize = StarhalmaBoardGuiConfig.MSG_TEXT_SIZE * 3
         textAlignment = TextAlignment.MIDDLE_CENTER
-        xy(StarhalmaBoardGuiConfig.midpoint - Point(windowBounds.width / 2, windowBounds.height / 2))
+        centerOn(this@StarhalmaBoardGui)
     }
 
     private fun pause() {
