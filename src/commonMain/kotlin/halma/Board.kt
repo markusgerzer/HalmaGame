@@ -35,6 +35,7 @@ interface StaticBoardMappings {
     val directions: IntRange
     val home: List<List<Int>>
     val extendedHome: List<List<Int>>
+    val middleFields: List<Int>
     val fieldVarieties: List<Int>
     val fieldNeighbors: List<List<Int>>
     val fieldDistances: List<List<Int>>
