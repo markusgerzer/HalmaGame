@@ -52,7 +52,7 @@ class StarhalmaBoardGui private constructor(
 
     override val onEmptyFieldClicked = AsyncSignal<Int>()
     init { onEmptyFieldClicked { println("Clicked on Field $it") } }
-    private val background = boardElements.starhalmaBoardBackground(onEmptyFieldClicked)
+    private val background = boardElements.starhalmaBoardBackground(this)
 
     private val marks = background.starhalmaMarks()
 
@@ -83,6 +83,7 @@ class StarhalmaBoardGui private constructor(
     var spin = 0.degrees
         set(value) {
             background.rotation = value
+            fieldCoordinates = getCurrentFieldCoordinates()
             for (pan in pans) { pan.xy(spinF(value, pan.fieldIdx)) }
             field = value
         }
@@ -91,6 +92,12 @@ class StarhalmaBoardGui private constructor(
         val (angle0, r) = StarhalmaBoardGuiConfig.fieldPolar[fieldIdx]
         val angle1 = Angle.fromDegrees(angle0.degrees + angle.degrees - 180.0)
         return Point.fromPolar(StarhalmaBoardGuiConfig.midpoint, angle1, r)
+    }
+
+    override var fieldCoordinates = getCurrentFieldCoordinates(); private set
+    private fun getCurrentFieldCoordinates() = List(StarhalmaStaticBoardMappings.fieldsSize) {
+        val p = spinF(spin, it)
+        Point(p.x, p.y * StarhalmaBoardGuiConfig.SCALE_Y)
     }
 
     private val waitingForMoveCompletionText = UIText(S.waitingForMoveCompletion).apply {

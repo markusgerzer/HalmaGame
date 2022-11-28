@@ -3,8 +3,7 @@ package gui
 import com.soywiz.korge.input.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
-import com.soywiz.korio.async.*
-import com.soywiz.korma.geom.Point
+import com.soywiz.korma.geom.*
 import com.soywiz.korma.geom.vector.*
 import halma.*
 
@@ -23,7 +22,7 @@ fun Graphics.starhalmaMarks() = List(StarhalmaStaticBoardMappings.fieldsSize) {
 
 
 fun Container.starhalmaBoardBackground(
-    onEmptyFieldClicked: AsyncSignal<Int>
+    starhalmaBoardGui: StarhalmaBoardGui
 ) = graphics( {
     val offset = Point(
         StarhalmaBoardGuiConfig.xFactor - StarhalmaBoardGuiConfig.FIELD_RADIUS,
@@ -83,9 +82,9 @@ fun Container.starhalmaBoardBackground(
     xy(StarhalmaBoardGuiConfig.midpoint)
     anchor(0.5, 0.5)
     onClick {
-        for ((i, p) in StarhalmaBoardGuiConfig.fieldCoordinates0Scaled.withIndex()) {
+        for ((i, p) in starhalmaBoardGui.fieldCoordinates.withIndex()) {
             if(p.distanceTo(it.currentPosStage) <= StarhalmaBoardGuiConfig.FIELD_RADIUS) {
-                onEmptyFieldClicked(i)
+                starhalmaBoardGui.onEmptyFieldClicked(i)
             }
         }
     }

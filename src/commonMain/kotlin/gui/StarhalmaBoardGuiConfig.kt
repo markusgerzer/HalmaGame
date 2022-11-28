@@ -60,10 +60,6 @@ object StarhalmaBoardGuiConfig {
         fieldCoordinates0 = coordinates.toList()
     }
 
-    val fieldCoordinates0Scaled = fieldCoordinates0.map {
-        Point(it.x, it.y * SCALE_Y)
-    }
-
     val midpoint = fieldCoordinates0[60]
 
     data class Polar(val angle: Angle, val r: Double)
