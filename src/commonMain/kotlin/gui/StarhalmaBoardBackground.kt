@@ -82,7 +82,8 @@ fun Container.starhalmaBoardBackground(
     xy(StarhalmaBoardGuiConfig.midpoint)
     anchor(0.5, 0.5)
     onClick {
-        for ((i, p) in starhalmaBoardGui.fieldCoordinates.withIndex()) {
+        val coordinates = starhalmaBoardGui.getCurrentFieldCoordinates()
+        for ((i, p) in coordinates.withIndex()) {
             if(p.distanceTo(it.currentPosStage) <= StarhalmaBoardGuiConfig.FIELD_RADIUS) {
                 starhalmaBoardGui.onEmptyFieldClicked(i)
             }

@@ -45,9 +45,10 @@ class StarhalmaBoardGui private constructor(
 
     override val onExit = Signal<Unit>()
 
-    private val boardElements = container {
+    private val boardElements = /*zoomContainer.*/container {
         scaleY = StarhalmaBoardGuiConfig.SCALE_Y
-        /*addZoomComponent(ZoomComponent(this))*/
+        // addZoomComponent(ZoomComponent(this))
+        // ZoomComponent is brocken !
     }
 
     override val onEmptyFieldClicked = AsyncSignal<Int>()
@@ -83,7 +84,6 @@ class StarhalmaBoardGui private constructor(
     var spin = 0.degrees
         set(value) {
             background.rotation = value
-            fieldCoordinates = getCurrentFieldCoordinates()
             for (pan in pans) { pan.xy(spinF(value, pan.fieldIdx)) }
             field = value
         }
@@ -94,10 +94,12 @@ class StarhalmaBoardGui private constructor(
         return Point.fromPolar(StarhalmaBoardGuiConfig.midpoint, angle1, r)
     }
 
-    override var fieldCoordinates = getCurrentFieldCoordinates(); private set
-    private fun getCurrentFieldCoordinates() = List(StarhalmaStaticBoardMappings.fieldsSize) {
+    fun getCurrentFieldCoordinates() = List(StarhalmaStaticBoardMappings.fieldsSize) {
         val p = spinF(spin, it)
-        Point(p.x, p.y * StarhalmaBoardGuiConfig.SCALE_Y)
+        Point(
+            p.x,
+            p.y * StarhalmaBoardGuiConfig.SCALE_Y
+        )
     }
 
     private val waitingForMoveCompletionText = UIText(S.waitingForMoveCompletion).apply {

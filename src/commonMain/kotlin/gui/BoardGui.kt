@@ -1,13 +1,11 @@
 package gui
 
-import com.soywiz.korge.ui.UIButton
+import com.soywiz.korge.ui.*
 import com.soywiz.korio.async.*
-import com.soywiz.korma.geom.*
-import halma.Board
+import halma.*
 
 interface BoardGui: Board {
     val onEmptyFieldClicked: AsyncSignal<Int>
-    val fieldCoordinates: List<Point>
     val goButton: UIButton
     val onExit: Signal<Unit>
 
