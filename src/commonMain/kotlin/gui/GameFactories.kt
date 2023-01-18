@@ -31,10 +31,10 @@ suspend fun <D: BoardGui, B: Board> Container.makeGame(
     val container = this@makeGame
     val numberOfPlayers = gameParameter.playerCreators.size
 
-    makeBoard(numberOfPlayers, boardCreator)
+    makeBoard(numberOfPlayers, boardBuilder)
         .let { board ->
             val boardGui =
-                boardGuiCreator(
+                boardGuiBuilder(
                     container,
                     numberOfPlayers,
                     board,

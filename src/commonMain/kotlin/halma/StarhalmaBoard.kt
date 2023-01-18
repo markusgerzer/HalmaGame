@@ -1,5 +1,7 @@
 package halma
 
+fun starhalmaBoard(numberOfPlayers: Int) = StarhalmaBoard(numberOfPlayers)
+
 class StarhalmaBoard(
     override val numberOfPlayers: Int,
     override val fields: IntArray = IntArray(StarhalmaStaticBoardMappings.fieldsSize)

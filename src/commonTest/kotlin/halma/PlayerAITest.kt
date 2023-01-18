@@ -4,6 +4,7 @@ import com.soywiz.klock.TimeSpan
 import com.soywiz.klock.measureTime
 import com.soywiz.korio.async.suspendTest
 import com.soywiz.korio.lang.portableSimpleName
+import gui.*
 import kotlin.test.Test
 
 
@@ -28,30 +29,41 @@ class PlayerAITest {
         println("===========================================")
         runTest(
             "${PlayerStupidAI::class.portableSimpleName} player = 2",
-            List(2) { :: PlayerStupidAI },
+            List(2) { ::PlayerStupidAI },
             ::StarhalmaBoard)
         println("===========================================")
         runTest(
             "${PlayerAI::class.portableSimpleName} player = 2",
-            List(2) { :: PlayerAI },
+            List(2) { ::PlayerAI },
             ::StarhalmaBoard)
         println("===========================================")
         runTest(
             "${PlayerHashedAI::class.portableSimpleName} player = 2",
-            List(2) { :: PlayerHashedAI },
+            List(2) { ::PlayerHashedAI },
             ::StarhalmaBoard)
         println("===========================================")
     }
 
+    @Test
+    fun solveTest2() {
+        val boardBuilder: BoardBuilder<StarhalmaBoard> = ::starhalmaBoard
+        val playerBuilder: PlayerBuilder<StarhalmaBoard> = ::PlayerAI
+        runTest(
+            playerBuilder::class.portableSimpleName,
+            listOf(playerBuilder),
+            boardBuilder
+        )
+    }
+
     private fun <B: Board>runTest(
         name: String,
-        playerClasses: List<(Int, List<Int>) -> Player<B>>,
-        boardClass: (Int) -> B,
+        playerBuilder: List<(Int, List<Int>) -> Player<B>>,
+        boardBuilder: (Int) -> B,
         block: Player<B>.()->Unit = { }
     ) = suspendTest(TimeSpan.NIL) {
         val game = makeGame(
-            boardClass,
-            playerClasses,
+            boardBuilder,
+            playerBuilder,
         ) {
             if (round >= 100) {
                 println(board.fields.toList())

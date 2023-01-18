@@ -5,14 +5,14 @@ import com.soywiz.korim.color.*
 import halma.*
 
 
-typealias BoardGuiCreator<D, B> = suspend Container.(Int, B, List<RGBA>, List<String>) -> D
-typealias BoardCreator<B> = (Int) -> B
-typealias PlayerCreator<D> = (Int, List<Int>) -> Player<D>
+typealias BoardGuiBuilder<D, B> = suspend Container.(Int, B, List<RGBA>, List<String>) -> D
+typealias BoardBuilder<B> = (Int) -> B
+typealias PlayerBuilder<D> = (Int, List<Int>) -> Player<D>
 
 data class GameParameter<D: BoardGui, B: Board> (
-    val boardGuiCreator: BoardGuiCreator<D, B>,
-    val boardCreator: BoardCreator<B>,
-    val playerCreators: List<PlayerCreator<D>>,
+    val boardGuiBuilder: BoardGuiBuilder<D, B>,
+    val boardBuilder: BoardBuilder<B>,
+    val playerCreators: List<PlayerBuilder<D>>,
     val playerColors: List<RGBA>,
     val playerNames: List<String>,
     val block: suspend Game<D>.() -> Unit = {}

@@ -24,20 +24,20 @@ open class PlayerAI<T: Board>(
     override suspend fun makeMove(): Move {
         var depth = 1
         var move: Move = evaluate(depth)
-        Console.log(move)
+        //Console.log(move)
         depth++
 
         val job = launch(Dispatchers.Default) {
             while (true) {
                 move = evaluate(depth)
-                println(move)
+                //println(move)
                 depth++
             }
         }
         delay(thinkingTime)
         job.cancelAndJoin()
 
-        println()
+        //println()
         return move
     }
 
@@ -68,7 +68,7 @@ open class PlayerAI<T: Board>(
             }
         }
 
-        logMove(depth, bestResult)
+        //logMove(depth, bestResult)
         if (bestMoves.isEmpty()) throw IllegalStateException("Can not move!")
         return bestMoves.random()
     }
