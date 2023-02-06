@@ -29,7 +29,7 @@ suspend fun <D: BoardGui, B: Board> Container.makeGame(
 ) =
     with(gameParameter) {
     val container = this@makeGame
-    val numberOfPlayers = gameParameter.playerCreators.size
+    val numberOfPlayers = gameParameter.playerBuilderList.size
 
     makeBoard(numberOfPlayers, boardBuilder)
         .let { board ->
@@ -43,7 +43,7 @@ suspend fun <D: BoardGui, B: Board> Container.makeGame(
                 )
 
             val players =
-                playerCreators
+                playerBuilderList
                     .mapIndexed { i, Player ->
                         Player(i + 1, board.idToHomeMaps[numberOfPlayers - 1][i + 1]!!)
                     }

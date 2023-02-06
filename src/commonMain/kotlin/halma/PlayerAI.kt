@@ -24,13 +24,13 @@ open class PlayerAI<T: Board>(
     override suspend fun makeMove(): Move {
         var depth = 1
         var move: Move = evaluate(depth)
-        //Console.log(move)
+        Console.log(move)
         depth++
 
         val job = launch(Dispatchers.Default) {
             while (true) {
                 move = evaluate(depth)
-                //println(move)
+                Console.log(move)
                 depth++
             }
         }
@@ -68,7 +68,7 @@ open class PlayerAI<T: Board>(
             }
         }
 
-        //logMove(depth, bestResult)
+        logMove(depth, bestResult)
         if (bestMoves.isEmpty()) throw IllegalStateException("Can not move!")
         return bestMoves.random()
     }
@@ -112,7 +112,7 @@ open class PlayerAI<T: Board>(
     protected open fun hook(playerId: Int, vararg fieldIdx: Int) {}
 
     private suspend inline fun forAllPossibleMove(playerId: Int, block: (Move) -> Unit) {
-        val rate0 = rateBoard()
+        //val rate0 = rateBoard()
         val possibleMoves = boardCopy.possibleMovesOfPlayerNr(playerId)
 
         for (move in possibleMoves) {
@@ -120,9 +120,10 @@ open class PlayerAI<T: Board>(
             boardCopy.fields[move.startFieldIdx] = 0
             boardCopy.fields[move.destFieldIdx] = playerId
             hook(playerId, move.startFieldIdx, move.destFieldIdx)
-            val rate1 = rateBoard()
-            if (rate1 >= rate0) block(move)
-            else filtered++
+            //val rate1 = rateBoard()
+            //if (rate1 >= rate0) block(move)
+            //else filtered++
+            block(move)
             boardCopy.fields[move.destFieldIdx] = 0
             boardCopy.fields[move.startFieldIdx] = playerId
             hook(playerId, move.startFieldIdx, move.destFieldIdx)

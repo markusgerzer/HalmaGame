@@ -12,7 +12,7 @@ typealias PlayerBuilder<D> = (Int, List<Int>) -> Player<D>
 data class GameParameter<D: BoardGui, B: Board> (
     val boardGuiBuilder: BoardGuiBuilder<D, B>,
     val boardBuilder: BoardBuilder<B>,
-    val playerCreators: List<PlayerBuilder<D>>,
+    val playerBuilderList: List<PlayerBuilder<D>>,
     val playerColors: List<RGBA>,
     val playerNames: List<String>,
     val block: suspend Game<D>.() -> Unit = {}

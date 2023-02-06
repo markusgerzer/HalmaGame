@@ -25,6 +25,16 @@ interface Board : StaticBoardMappings {
         return moves.minByOrNull { it.destFieldIdxList.size }
     }
 
+    fun doMove(move: Move) {
+        fields[move.destFieldIdx] = fields[move.startFieldIdx]
+        fields[move.startFieldIdx] = 0
+    }
+    fun undoMove(move: Move) {
+        fields[move.startFieldIdx] = fields[move.destFieldIdx]
+        fields[move.destFieldIdx] = 0
+    }
+    fun nextPlayer(playerId: Int) = playerId % numberOfPlayers + 1
+
     fun hookBeforeMove(player: Player<out Board>) {}
     suspend fun hookGameEnd(winner: Player<out Board>) { println(winner) }
 }

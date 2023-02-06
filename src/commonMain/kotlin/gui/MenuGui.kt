@@ -123,9 +123,9 @@ class MenuGui(val onStart: suspend (GameParameter<StarhalmaBoardGui, StarhalmaBo
 
         val supportedTypes: Map<String, ((Int, List<Int>) -> Player<StarhalmaBoardGui>)?> = mapOf(
              S.playerGui to ::PlayerGui,
-             S.playerAI to ::PlayerAI,
-             S.playerHashedAI to ::PlayerHashedAI,
-             S.playerStupidAI to ::PlayerStupidAI
+             S.playerAI to ::PlayerAI2,
+             //S.playerHashedAI to ::PlayerHashedAI,
+             //S.playerStupidAI to ::PlayerStupidAI
         )
     }
 }
