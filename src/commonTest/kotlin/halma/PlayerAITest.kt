@@ -10,49 +10,13 @@ import kotlin.test.*
 
 class PlayerAITest {
     @Test
-    fun solveTest() {
-        println("===========================================")
-        runTest(
-            "${PlayerStupidAI::class.portableSimpleName} player = 1",
-            listOf(::PlayerStupidAI),
-            ::StarhalmaBoard)
-        println("===========================================")
-        runTest(
-            "${PlayerAI::class.portableSimpleName} player = 1",
-            listOf(::PlayerAI),
-            ::StarhalmaBoard)
-        println("===========================================")
-        runTest(
-            "${PlayerHashedAI::class.portableSimpleName} player = 1",
-            listOf(::PlayerHashedAI),
-            ::StarhalmaBoard)
-        println("===========================================")
-        runTest(
-            "${PlayerStupidAI::class.portableSimpleName} player = 2",
-            List(2) { ::PlayerStupidAI },
-            ::StarhalmaBoard)
-        println("===========================================")
-        runTest(
-            "${PlayerAI::class.portableSimpleName} player = 2",
-            List(2) { ::PlayerAI },
-            ::StarhalmaBoard)
-        println("===========================================")
-        runTest(
-            "${PlayerHashedAI::class.portableSimpleName} player = 2",
-            List(2) { ::PlayerHashedAI },
-            ::StarhalmaBoard)
-        println("===========================================")
-    }
-
-    @Test
-    fun solveTest2() {
+    fun solveTest1() {
         val boardBuilder: BoardBuilder<StarhalmaBoard> = ::starhalmaBoard
         val playerBuilder: PlayerBuilder<StarhalmaBoard> = ::PlayerAI2
         for (n in 1..6) {
             runTest(
                 playerBuilder::class.portableSimpleName,
                 List(n) { playerBuilder },
-                //listOf(playerBuilder, playerBuilder),
                 boardBuilder
             )
         }
@@ -90,17 +54,22 @@ class PlayerAITest {
             boardBuilder,
             playerBuilder,
         ) {
-            println("Round: $round")
+            //println("Round: $round")
             if (round >= 100) {
-                println(board.fields.toList())
-                displayStarhalmaFields(board.fields.toList())
+                //println(board.fields.toList())
+                //displayStarhalmaFields(board.fields.toList())
                 throw Exception()
             }
         }
         game.players.forEach{ it.apply(block) }
-        val time = measureTime { game.start() }
-        print("$name: ")
-        println("Needed ${game.round} rounds and ${time.seconds} seconds to solve.")
+        try {
+            val time = measureTime { game.start() }
+            print("$name: ")
+            println("Needed ${game.round} rounds and ${time.seconds} seconds to solve.")
+        } catch (e: Exception) {
+            displayStarhalmaFields(game.board.fields.toList())
+            throw e
+        }
     }
 
     @Test

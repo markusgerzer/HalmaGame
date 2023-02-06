@@ -1,7 +1,5 @@
 package halma
 
-import com.soywiz.klogger.*
-
 class RatedMove (val move: Move?, val rating: Rating) {
     override fun toString() = "$move, $rating"
 }
@@ -34,9 +32,9 @@ open class PlayerAI2<T: Board>(
     override lateinit var game: Game<T>
 
     override suspend fun makeMove(): Move {
-        val depth = 2
+        val depth = 3
         val ratedMove = evaluate(depth, id)
-        Console.log(ratedMove)
+        //Console.log(ratedMove)
         return ratedMove.move!!
     }
 
@@ -45,25 +43,37 @@ open class PlayerAI2<T: Board>(
 
     private fun calcRating() = ratingOf(*IntArray(game.players.size) { calcScore(game.players[it]) })
 
-    private fun evaluate(depth: Int, playerId: Int): RatedMove {
-        if (depth == 0 || game.players[playerId -1 ].hasWon())
-            return RatedMove(null, calcRating())
+    private fun evaluate(
+        depth: Int,
+        playerId: Int,
+        ratingTillNow: Rating = calcRating()
+    ): RatedMove {
+        if (depth == 0 || game.players[playerId -1].hasWon())
+            return RatedMove(null, ratingTillNow)
 
-        var bestRating = worstRatingFor(playerId)
-        var bestMove: Move? = null
-
-        val possibleMoves = game.board.possibleMovesOfPlayerNr(playerId).toList()
+        val scoreTillNow = ratingTillNow[playerId]
+        var bestRating = ratingTillNow
+        val possibleMoves = game.board.possibleMovesOfPlayerNr(playerId)
+        var bestMove = possibleMoves.first()
         for (move in possibleMoves) {
             game.board.doMove(move)
 
-            val rating =
-                evaluate(depth - 1, game.board.nextPlayer(playerId)).rating
+            val score = calcScore(game.players[playerId - 1])
+            if (score > scoreTillNow) {
+                val rating =
+                    evaluate(
+                        depth - 1,
+                        game.board.nextPlayer(playerId),
+                        bestRating.withNewScore(playerId, score)
+                    ).rating
 
-            val compare = compareRatingsForPlayerId(playerId, rating, bestRating)
-            if (compare > 0) {
-                bestRating = rating
-                bestMove = move
-            } else if (compare == 0) { /* TODO() */ }
+                val compare = compareRatingsForPlayerId(playerId, rating, bestRating)
+                if (compare > 0) {
+                    bestRating = rating
+                    bestMove = move
+                } else if (compare == 0) { /* TODO() */
+                }
+            }
 
             game.board.undoMove(move)
         }
