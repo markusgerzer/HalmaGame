@@ -6,7 +6,7 @@ class RatedMove (val move: Move?, val rating: Rating) {
 
 
 fun interface CalcScore {
-    fun calcScore(player: Player<*>): Int
+    fun calcScore(player: Player<*>): Score
 }
 
 val distanceToHome = CalcScore { player ->
@@ -20,9 +20,15 @@ val distanceToHome = CalcScore { player ->
         for (i in pansNotAtHome.indices) {
             distance += board.fieldDistances[pansNotAtHome[i]][freeHomeFields[i]]
         }
-        Rating.MAX_SCORE - distance
+        Score(Rating.MAX_SCORE - distance)
     }
 }
+
+
+fun interface AdjustScore {
+    fun adjustScore(player: Player<*>, score: Int, move: Move): Score
+}
+
 
 
 open class PlayerAI2<T: Board>(
@@ -39,9 +45,14 @@ open class PlayerAI2<T: Board>(
     }
 
     private fun compareRatingsForPlayerId(playerId: Int, a: Rating, b: Rating) =
-        a[playerId].compareTo(b[playerId])
+        a[playerId].value.compareTo(b[playerId].value)
 
-    private fun calcRating() = ratingOf(*IntArray(game.players.size) { calcScore(game.players[it]) })
+    private fun compareRatingsForPlayerId2(playerId: Int, a: Rating, b: Rating): Int {
+        TODO()
+    }
+
+
+    private fun calcRating() = ratingFrom(List(game.players.size) { calcScore(game.players[it]) })
 
     private fun evaluate(
         depth: Int,
@@ -59,7 +70,7 @@ open class PlayerAI2<T: Board>(
             game.board.doMove(move)
 
             val score = calcScore(game.players[playerId - 1])
-            if (score > scoreTillNow) {
+            if (score.value > scoreTillNow.value) {
                 val rating =
                     evaluate(
                         depth - 1,

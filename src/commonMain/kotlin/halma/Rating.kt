@@ -18,10 +18,24 @@ private const val PLAYER_6_U_MASK = 0b0000_0000000000_1111111111_1111111111_1111
 
 private const val SCORE_MASK = 0b11_1111_1111
 
+@JvmInline
+value class Score(val value: Int) {
+    init {
+        require(value in MIN_VALUE..MAX_VALUE) {
+            "$value not in $MIN_VALUE..$MAX_VALUE"
+        }
+    }
 
-fun ratingOf(vararg scores: Int) = ratingFrom(scores.toList())
+    companion object {
+        const val MIN_VALUE = Rating.MIN_SCORE
+        const val MAX_VALUE = Rating.MAX_SCORE
+    }
+}
 
-fun ratingFrom(scores: List<Int>): Rating {
+fun ratingOf() = ratingOf<Score>()
+fun <T: Score>ratingOf(vararg scores: T) = ratingFrom(scores.toList())
+
+fun ratingFrom(scores: List<Score>): Rating {
     var rating = Rating()
     for (i in scores.indices)
         rating = rating.withNewScore(i + 1, scores[i])
@@ -46,18 +60,20 @@ value class Rating(private val data: ULong = 0UL) {
         const val MAX_SCORE = SCORE_MASK
     }
 
-    operator fun get(playerId: Int) = when (playerId) {
-        1 -> data and PLAYER_1_MASK
-        2 -> data and PLAYER_2_MASK shr 10
-        3 -> data and PLAYER_3_MASK shr 20
-        4 -> data and PLAYER_4_MASK shr 30
-        5 -> data and PLAYER_5_MASK shr 40
-        6 -> data and PLAYER_6_MASK shr 50
-        else -> throw IndexOutOfBoundsException()
-    }.toInt()
+    operator fun get(playerId: Int) = Score(
+        when (playerId) {
+            1 -> data and PLAYER_1_MASK
+            2 -> data and PLAYER_2_MASK shr 10
+            3 -> data and PLAYER_3_MASK shr 20
+            4 -> data and PLAYER_4_MASK shr 30
+            5 -> data and PLAYER_5_MASK shr 40
+            6 -> data and PLAYER_6_MASK shr 50
+            else -> throw IndexOutOfBoundsException()
+        }.toInt()
+    )
 
     fun decrement(playerId: Int): Rating {
-        if (this[playerId] == 0) return this
+        if (this[playerId] == Score(Score.MIN_VALUE)) return this
         var data1 = data
         var mask = when (playerId) {
             1 -> 0b1UL
@@ -76,8 +92,8 @@ value class Rating(private val data: ULong = 0UL) {
         return Rating(data1)
     }
 
-    fun withNewScore(playerId: Int, score: Int): Rating {
-        val mask = (score and SCORE_MASK).toULong()
+    fun withNewScore(playerId: Int, score: Score): Rating {
+        val mask = (score.value and SCORE_MASK).toULong()
         return when (playerId) {
             1 -> Rating(data and PLAYER_1_U_MASK or mask)
             2 -> Rating(data and PLAYER_2_U_MASK or (mask shl 10))
