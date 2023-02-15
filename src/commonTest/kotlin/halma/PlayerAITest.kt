@@ -29,7 +29,7 @@ class PlayerAITest {
             listOf(::PlayerAI2)
         ) {}
 
-        with(game.players[0]) {
+        with(game.playerById(1)) {
             val board = game.board
             val fields = board.fields
             val ownPans = fields.indices.filter { fields[it] == id }
@@ -61,7 +61,7 @@ class PlayerAITest {
                 throw NotSolvedException()
             }
         }
-        game.players.forEach{ it.apply(block) }
+        game.forEachPlayer { it.apply(block) }
         try {
             val time = measureTime { game.start() }
             print("$name: ")
@@ -84,7 +84,7 @@ class PlayerAITest {
             val player = PlayerAI<StarhalmaBoard>(1, StarhalmaStaticBoardMappings.idToHomeMaps[0][1]!!)
             val board = StarhalmaBoard(1, fields)
             val game = Game(board, listOf(player)) { displayStarhalmaFields(fields.toList()) }
-            game.players.forEach { it.game = game }
+            game.forEachPlayer { it.game = game }
             displayStarhalmaFields(fields.toList())
             game.start()
         }
@@ -107,7 +107,7 @@ class PlayerAITest {
                     displayStarhalmaFields(fields.toList())
                     assertEquals(1, round)
                 }
-                game.players.forEach { it.game = game }
+                game.forEachPlayer { it.game = game }
                 displayStarhalmaFields(fields.toList())
                 game.start()
 
@@ -119,7 +119,7 @@ class PlayerAITest {
     @Test
     fun zobristHashTest() = suspendTest {
         val game = makeGame(::StarhalmaBoard, listOf(::PlayerHashedAI)) { }
-        val player = game.players[0] as PlayerHashedAI
+        val player = game.playerById(1) as PlayerHashedAI
         println(player.zobristTable.toList())
         println(player.zobristHash)
         player.updateZobristHash(1, 14)

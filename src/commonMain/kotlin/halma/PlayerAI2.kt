@@ -26,14 +26,14 @@ open class PlayerAI2<T: Board>(
     }
 
 
-    private fun calcRating() = ratingFrom(List(game.players.size) { calcScore(game.players[it]) })
+    private fun calcRating() = ratingFrom(List(game.board.numberOfPlayers) { calcScore(game.playerById(it + 1)) })
 
     private fun evaluate(
         depth: Int,
         playerId: Int,
         ratingTillNow: Rating = calcRating()
     ): RatedMove {
-        if (depth == 0 || game.players[playerId -1].hasWon())
+        if (depth == 0 || game.playerById(playerId).hasWon())
             return RatedMove(null, ratingTillNow)
 
         val scoreTillNow = ratingTillNow[playerId]
@@ -44,7 +44,7 @@ open class PlayerAI2<T: Board>(
             game.board.doMove(move)
 
             //val score = adjustScore(game.players[playerId - 1], scoreTillNow, move)
-            val score = calcScore(game.players[playerId - 1])
+            val score = calcScore(game.playerById(playerId))
             //println(score)
             if (score.value > scoreTillNow.value) {
                 //print(depth)
