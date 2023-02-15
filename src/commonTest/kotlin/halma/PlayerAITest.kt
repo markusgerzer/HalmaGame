@@ -43,7 +43,7 @@ class PlayerAITest {
         }
     }
 
-
+    class NotSolvedException() : Exception()
     private fun <B: Board>runTest(
         name: String,
         playerBuilder: List<PlayerBuilder<B>>,
@@ -58,7 +58,7 @@ class PlayerAITest {
             if (round >= 100) {
                 //println(board.fields.toList())
                 //displayStarhalmaFields(board.fields.toList())
-                throw Exception()
+                throw NotSolvedException()
             }
         }
         game.players.forEach{ it.apply(block) }
@@ -66,7 +66,7 @@ class PlayerAITest {
             val time = measureTime { game.start() }
             print("$name: ")
             println("Needed ${game.round} rounds and ${time.seconds} seconds to solve.")
-        } catch (e: Exception) {
+        } catch (e: NotSolvedException) {
             displayStarhalmaFields(game.board.fields.toList())
             throw e
         }
