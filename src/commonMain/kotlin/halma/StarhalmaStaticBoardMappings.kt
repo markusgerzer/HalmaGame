@@ -87,6 +87,25 @@ object StarhalmaStaticBoardMappings: StaticBoardMappings {
 
     override val home = listOf(
         listOf(  0,   1,   2,   3,   4,   5,   6,   7,   8,   9),   // home 1
+        listOf( 22,  21,  34,  20,  33,  45,  19,  32,  44,  55),   // home 2
+        listOf(110,  97, 109,  85,  96, 108,  74,  84,  95, 107),   // home 3
+        listOf(120, 119, 118, 117, 116, 115, 114, 113, 112, 111),   // home 4
+        listOf( 98,  99,  86, 100,  87,  75, 101,  88,  76,  65),   // home 5
+        listOf( 10,  23,  11,  35,  24,  12,  46,  36,  25,  13)    // home 6
+    )
+
+    override val extendedHome = listOf(
+        listOf(  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  14,  15,  16,  17,  18),   // home 1
+        listOf( 22,  21,  34,  20,  33,  45,  19,  32,  44,  55,  18,  31,  43,  54,  64),   // home 2
+        listOf(110,  97, 109,  85,  96, 108,  74,  84,  95, 107,  64,  73,  83,  94, 106),   // home 3
+        listOf(120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 106, 105, 104, 103, 102),   // home 4
+        listOf( 98,  99,  86, 100,  87,  75, 101,  88,  76,  65, 102,  89,  77,  66,  56),   // home 5
+        listOf( 10,  23,  11,  35,  24,  12,  46,  36,  25,  13,  56,  47,  37,  26,  14)    // home 6
+    )
+
+    /*
+    val home = listOf(
+        listOf(  0,   1,   2,   3,   4,   5,   6,   7,   8,   9),   // home 1
         listOf( 19,  20,  21,  22,  32,  33,  34,  44,  45,  55),   // home 2
         listOf( 74,  84,  85,  95,  96,  97, 107, 108, 109, 110),   // home 3
         listOf(111, 112, 113, 114, 115, 116, 117, 118, 119, 120),   // home 4
@@ -94,18 +113,18 @@ object StarhalmaStaticBoardMappings: StaticBoardMappings {
         listOf( 10,  11,  12,  13,  23,  24,  25,  35,  36,  46)    // home 6
     )
 
-    override val extendedHome = listOf(
+    val extendedHome = listOf(
         listOf(  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  14,  15,  16,  17,  18),   // home 1
         listOf( 18,  19,  20,  21,  22,  31,  32,  33,  34,  43,  44,  45,  54,  55,  64),   // home 2
         listOf( 64,  73,  74,  83,  84,  85,  94,  95,  96,  97, 106, 107, 108, 109, 110),   // home 3
         listOf(102, 103, 104, 105, 106, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120),   // home 4
         listOf( 56,  65,  66,  75,  76,  77,  86,  87,  88,  89,  98,  99, 100, 101, 102),   // home 5
         listOf( 10,  11,  12,  13,  14,  23,  24,  25,  26,  35,  36,  37,  46,  47,  56)    // home 6
-    )
+    )*/
 
     override val middleFields = (0 until fieldsSize) - extendedHome.flatten().toSet()
 
-    override val maxNumberOfPlayers = (1..6).toList()
+    override val maxNumberOfPlayers = 6
 
     override val fieldDistances =
         List(fieldsSize) { idx1 ->

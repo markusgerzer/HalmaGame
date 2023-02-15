@@ -49,7 +49,7 @@ interface StaticBoardMappings {
     val fieldVarieties: List<Int>
     val fieldNeighbors: List<List<Int>>
     val fieldDistances: List<List<Int>>
-    val maxNumberOfPlayers: List<Int>
+    val maxNumberOfPlayers: Int
     val idToHomeMaps: List<Map<Int, List<Int>>>
     val idToStartMaps: List<Map<Int, List<Int>>>
 }

@@ -7,7 +7,7 @@ fun <T: Board>makeBoard(
     numberOfPlayers: Int,
     boardBuilder: BoardBuilder<T>,
 ) = boardBuilder(numberOfPlayers).apply {
-    require(numberOfPlayers in maxNumberOfPlayers)
+    require(numberOfPlayers in 1..maxNumberOfPlayers)
     for ((value, idxList) in idToStartMaps[numberOfPlayers - 1]) {
         for (idx in idxList) fields[idx] = value
     }
